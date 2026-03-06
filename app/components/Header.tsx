@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Facebook, Twitter, Instagram, Youtube, Menu, X } from "lucide-react";
@@ -39,11 +39,21 @@ const NavLinks = [
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Add scroll event listener to track when the page is scrolled
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="flex flex-col w-full font-sans">
+    <>
       {/* Top Bar (Scrolls away) */}
-      <div className="w-full bg-[#0a2540] flex justify-end">
+      <div className="w-full bg-[#0a2540] flex justify-end font-sans">
         <div className="flex border-l border-white/20">
           {SocialMediaLinks.map((link) => {
             const Icon = link.icon;
@@ -64,8 +74,14 @@ export default function Header() {
       </div>
 
       {/* Bottom Bar (Sticky) */}
-      <header className="sticky top-0 z-50 w-full bg-[#0a2540] border-t border-white/20 shadow-md">
-        <div className="w-full max-w-7xl mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
+      <header
+        className={`sticky top-0 z-50 w-full transition-all duration-300 shadow-md border-t border-white/20 ${
+          isScrolled
+            ? "bg-[#0a2540]/95 backdrop-blur-md py-2"
+            : "bg-[#0a2540] py-4"
+        }`}
+      >
+        <div className="w-full max-w-7xl mx-auto px-4 lg:px-8 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center group">
             <Image
@@ -73,7 +89,9 @@ export default function Header() {
               alt="ISKCON Logo"
               width={160}
               height={80}
-              className="h-16 w-auto object-contain hover:opacity-80 transition-opacity"
+              className={`w-auto object-contain hover:opacity-80 transition-all duration-300 ${
+                isScrolled ? "h-12" : "h-16"
+              }`}
               priority
             />
           </Link>
@@ -123,6 +141,6 @@ export default function Header() {
           </div>
         )}
       </header>
-    </div>
+    </>
   );
 }
