@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function loginAdmin(formData: FormData) {
+export async function loginAdmin(prevState: any, formData: FormData) {
   const id = formData.get("id");
   const password = formData.get("password");
 

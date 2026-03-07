@@ -8,7 +8,7 @@ export default function AdminDashboard() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between">
             <div className="flex">
-              <div className="flex flex-shrink-0 items-center">
+              <div className="flex shrink-0 items-center">
                 <span className="text-xl font-bold text-indigo-600">
                   Admin Panel
                 </span>
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
       <main>
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="overflow-hidden rounded-lg bg-white shadow">
-            <div className="px-4 py-5 sm:p-6 text-center text-gray-500 py-32">
+            <div className="px-4 sm:p-6 text-center text-gray-500 py-32">
               <h2 className="text-2xl font-semibold mb-2 text-gray-800">
                 Welcome to the Admin Dashboard
               </h2>
