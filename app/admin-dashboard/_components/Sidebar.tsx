@@ -19,6 +19,7 @@ const navItems = [
   { name: "Cities", href: "/admin-dashboard/cities", icon: MapPin },
   { name: "Temples", href: "/admin-dashboard/temples", icon: Building2 },
   { name: "Books", href: "/admin-dashboard/books", icon: BookOpen },
+  { name: "Offerings", href: "/admin-dashboard/offerings", icon: BookOpen },
 ];
 
 export function Sidebar() {
