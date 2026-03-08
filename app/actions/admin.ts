@@ -105,6 +105,7 @@ export async function getAdminOfferings(filters?: {
   stateId?: string;
   cityId?: string;
   templeId?: string;
+  language?: string;
 }) {
   const conditions = [];
 
@@ -119,6 +120,9 @@ export async function getAdminOfferings(filters?: {
   }
   if (filters?.templeId) {
     conditions.push(eq(users.templeId, filters.templeId));
+  }
+  if (filters?.language) {
+    conditions.push(eq(offerings.language, filters.language as any));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

@@ -5,6 +5,7 @@ import { OfferingFormData } from "../_components/types";
 
 export function useSubmitOffering(
   formData: OfferingFormData,
+  setFormData: React.Dispatch<React.SetStateAction<OfferingFormData>>,
   file: File | null,
   extractedText: string,
   setError: (error: string | null) => void,
@@ -85,6 +86,9 @@ export function useSubmitOffering(
         const result = await fixGrammar(extractedText);
         if (result.success && result.text) {
           setExtractedText(result.text);
+          if (result.language) {
+            setFormData((prev) => ({ ...prev, language: result.language }));
+          }
         }
       } catch (err) {
         console.error("Grammar fix failed", err);

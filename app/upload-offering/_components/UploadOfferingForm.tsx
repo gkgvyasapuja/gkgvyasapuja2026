@@ -36,7 +36,7 @@ export default function UploadOfferingForm() {
     isReviewing,
     isFixingText,
     setIsReviewing,
-  } = useSubmitOffering(formData, file, extractedText, setError);
+  } = useSubmitOffering(formData, setFormData, file, extractedText, setError);
 
   if (success) {
     return <SuccessState onReturnHome={() => router.push("/")} />;

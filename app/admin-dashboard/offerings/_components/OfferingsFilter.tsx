@@ -26,6 +26,7 @@ export function OfferingsFilter({
   const currentState = searchParams.get("state") || "";
   const currentCity = searchParams.get("city") || "";
   const currentTemple = searchParams.get("temple") || "";
+  const currentLanguage = searchParams.get("language") || "";
 
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -122,9 +123,29 @@ export function OfferingsFilter({
             ))}
           </select>
         </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="language-filter" className="text-sm font-medium">
+            Language
+          </Label>
+          <select
+            id="language-filter"
+            value={currentLanguage}
+            onChange={(e) => handleFilterChange("language", e.target.value)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">All Languages</option>
+            <option value="English">English</option>
+            <option value="Hindi">Hindi</option>
+          </select>
+        </div>
       </div>
 
-      {(currentCountry || currentState || currentCity || currentTemple) && (
+      {(currentCountry ||
+        currentState ||
+        currentCity ||
+        currentTemple ||
+        currentLanguage) && (
         <div className="mt-4 flex justify-end">
           <Button variant="outline" onClick={handleClear} className="text-sm">
             Clear Filters

@@ -26,9 +26,10 @@ export default async function OfferingsPage({
   const stateId = searchParams.state as string | undefined;
   const cityId = searchParams.city as string | undefined;
   const templeId = searchParams.temple as string | undefined;
+  const language = searchParams.language as string | undefined;
 
   const [offerings, countries, states, cities, temples] = await Promise.all([
-    getAdminOfferings({ countryId, stateId, cityId, templeId }),
+    getAdminOfferings({ countryId, stateId, cityId, templeId, language }),
     getCountries(),
     getStates(),
     getCities(),
