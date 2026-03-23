@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { Toaster } from "sonner";
 
 import { useOfferingForm } from "../_hooks/useOfferingForm";
 import { useLocationData } from "../_hooks/useLocationData";
@@ -46,6 +47,8 @@ export default function UploadOfferingForm() {
   }
 
   return (
+    <>
+    <Toaster position="top-center" toastOptions={{ className: 'bg-[#0a2540] text-white border-white/20 shadow-2xl font-sans' }} />
     <div className="w-full max-w-4xl mx-auto bg-[#0a2540] rounded-3xl shadow-2xl overflow-hidden font-sans border border-white/10 relative">
       <div className="p-8 md:p-14">
         {/* Stepper UI */}
@@ -150,7 +153,7 @@ export default function UploadOfferingForm() {
                   Review your offering
                 </p>
                 <p className="text-md text-blue-100/80">
-                  We have checked your document's text to ensure proper spelling and formatting using AI. Please review the text above to make sure it is correct. If you agree, click "Confirm & Submit" below.
+                  We have checked your document's text to ensure proper spelling and formatting. Please review the text above to make sure it is correct. If you agree, click "Confirm & Submit" below.
                 </p>
               </div>
             </div>
@@ -222,5 +225,6 @@ export default function UploadOfferingForm() {
         </Button>
       </div>
     </div>
+    </>
   );
 }

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { submitOffering } from "@/app/actions/offering";
 import { fixGrammar } from "@/app/actions/ai";
 import { OfferingFormData } from "../_components/types";
+import { toast } from "sonner";
 
 export function useSubmitOffering(
   formData: OfferingFormData,
@@ -69,9 +70,23 @@ export function useSubmitOffering(
 
     setIsSubmitting(true);
     setError(null);
+
+    // Clean up ai-correction tags before saving
+    let finalHtml = extractedText;
+    if (typeof window !== "undefined") {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(finalHtml, "text/html");
+      const nodes = doc.querySelectorAll(".ai-correction");
+      nodes.forEach((node) => {
+        const textNode = doc.createTextNode(node.textContent || "");
+        node.parentNode?.replaceChild(textNode, node);
+      });
+      finalHtml = doc.body.innerHTML;
+    }
+
     const result = await submitOffering({
       ...formData,
-      offeringText: extractedText,
+      offeringText: finalHtml,
     });
     setIsSubmitting(false);
 
@@ -98,6 +113,16 @@ export function useSubmitOffering(
           setExtractedText(result.text);
           if (result.language) {
             setFormData((prev) => ({ ...prev, language: result.language }));
+          }
+
+          if (result.text.includes("ai-correction")) {
+            toast.success("We have updated some changes in the offering, if you don't want them please reject it.", {
+              className: "bg-[#0a2540] text-white border border-white/20",
+            });
+          } else {
+            toast.success("All good! No changes from our side.", {
+              className: "bg-[#0a2540] text-white border border-white/20",
+            });
           }
         }
       } catch (err) {
