@@ -15,7 +15,7 @@ export function useSubmitOffering(
   const [isReviewing, setIsReviewing] = useState(false);
   const [isFixingText, setIsFixingText] = useState(false);
 
-  const validateForm = () => {
+  const validateStep1 = () => {
     if (
       !formData.firstName ||
       !formData.lastName ||
@@ -47,12 +47,21 @@ export function useSubmitOffering(
       );
       return false;
     }
+    setError(null);
+    return true;
+  };
+
+  const validateStep2 = () => {
     if (!file || !extractedText) {
       setError("Please upload a valid .docx offering document.");
       return false;
     }
     setError(null);
     return true;
+  };
+
+  const validateForm = () => {
+    return validateStep1() && validateStep2();
   };
 
   const submitFinal = async () => {
@@ -76,8 +85,9 @@ export function useSubmitOffering(
 
   const handleAutoCorrection = async (
     setExtractedText: (text: string) => void,
+    onSuccess?: () => void
   ) => {
-    if (!validateForm()) return;
+    if (!validateStep2()) return;
 
     if (!isReviewing) {
       setIsFixingText(true);
@@ -95,6 +105,7 @@ export function useSubmitOffering(
       } finally {
         setIsFixingText(false);
         setIsReviewing(true);
+        if (onSuccess) onSuccess();
         // Ensure user can see the updated text
         window.scrollBy({ top: 300, behavior: "smooth" });
       }
@@ -108,6 +119,8 @@ export function useSubmitOffering(
     success,
     submitFinal,
     validateForm,
+    validateStep1,
+    validateStep2,
     handleAutoCorrection,
     isReviewing,
     isFixingText,
