@@ -1,5 +1,12 @@
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
-const sql = neon(process.env.DB_URI!);
-export const db = drizzle({ client: sql });
+// Required for DigitalOcean PostgreSQL self-signed cert
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
+const pool = new Pool({
+  connectionString: process.env.DB_URI!,
+  ssl: true,
+});
+
+export const db = drizzle({ client: pool });
