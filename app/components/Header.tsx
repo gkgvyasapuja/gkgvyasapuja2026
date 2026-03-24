@@ -32,10 +32,10 @@ const SocialMediaLinks = [
 const NavLinks = [
   { name: "Home", href: "/" },
   { name: "Upload Offering", href: "/upload-offering" },
-  { name: "About Guru Maharaja", href: "/about-us" },
+  { name: "About Guru Maharaja", href: "/about" },
   { name: "Donate", href: "/donate" },
-  { name: "E-Books", href: "/e-books" },
-  { name: "Contact Us", href: "/contact" },
+  { name: "E-Books", href: "/ebooks" },
+  { name: "Contact Us", href: "/contact-us" },
 ];
 
 export default function Header() {
@@ -89,7 +89,10 @@ export default function Header() {
       >
         <div className="w-full max-w-7xl mx-auto px-4 lg:px-8 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center group">
+          <Link
+            href="/"
+            className="flex items-center group"
+          >
             <Image
               src="/asset/gkg_whiteLogo.png"
               alt="ISKCON Logo"
