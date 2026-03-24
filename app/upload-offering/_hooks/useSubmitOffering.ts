@@ -2,6 +2,7 @@ import { useState } from "react";
 import { submitOffering } from "@/app/actions/offering";
 import { fixGrammar } from "@/app/actions/ai";
 import { OfferingFormData } from "../_components/types";
+import { toast } from "sonner";
 
 export function useSubmitOffering(
   formData: OfferingFormData,
@@ -15,7 +16,7 @@ export function useSubmitOffering(
   const [isReviewing, setIsReviewing] = useState(false);
   const [isFixingText, setIsFixingText] = useState(false);
 
-  const validateForm = () => {
+  const validateStep1 = () => {
     if (
       !formData.firstName ||
       !formData.lastName ||
@@ -47,6 +48,11 @@ export function useSubmitOffering(
       );
       return false;
     }
+    setError(null);
+    return true;
+  };
+
+  const validateStep2 = () => {
     if (!file || !extractedText) {
       setError("Please upload a valid .docx offering document.");
       return false;
@@ -55,14 +61,32 @@ export function useSubmitOffering(
     return true;
   };
 
+  const validateForm = () => {
+    return validateStep1() && validateStep2();
+  };
+
   const submitFinal = async () => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     setError(null);
+
+    // Clean up ai-correction tags before saving
+    let finalHtml = extractedText;
+    if (typeof window !== "undefined") {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(finalHtml, "text/html");
+      const nodes = doc.querySelectorAll(".ai-correction");
+      nodes.forEach((node) => {
+        const textNode = doc.createTextNode(node.textContent || "");
+        node.parentNode?.replaceChild(textNode, node);
+      });
+      finalHtml = doc.body.innerHTML;
+    }
+
     const result = await submitOffering({
       ...formData,
-      offeringText: extractedText,
+      offeringText: finalHtml,
     });
     setIsSubmitting(false);
 
@@ -76,8 +100,9 @@ export function useSubmitOffering(
 
   const handleAutoCorrection = async (
     setExtractedText: (text: string) => void,
+    onSuccess?: () => void
   ) => {
-    if (!validateForm()) return;
+    if (!validateStep2()) return;
 
     if (!isReviewing) {
       setIsFixingText(true);
@@ -89,12 +114,23 @@ export function useSubmitOffering(
           if (result.language) {
             setFormData((prev) => ({ ...prev, language: result.language }));
           }
+
+          if (result.text.includes("ai-correction")) {
+            toast.success("We have updated some changes in the offering, if you don't want them please reject it.", {
+              className: "bg-[#0a2540] text-white border border-white/20",
+            });
+          } else {
+            toast.success("All good! No changes from our side.", {
+              className: "bg-[#0a2540] text-white border border-white/20",
+            });
+          }
         }
       } catch (err) {
         console.error("Grammar fix failed", err);
       } finally {
         setIsFixingText(false);
         setIsReviewing(true);
+        if (onSuccess) onSuccess();
         // Ensure user can see the updated text
         window.scrollBy({ top: 300, behavior: "smooth" });
       }
@@ -108,6 +144,8 @@ export function useSubmitOffering(
     success,
     submitFinal,
     validateForm,
+    validateStep1,
+    validateStep2,
     handleAutoCorrection,
     isReviewing,
     isFixingText,

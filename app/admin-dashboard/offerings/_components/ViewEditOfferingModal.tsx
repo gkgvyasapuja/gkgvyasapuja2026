@@ -13,6 +13,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { editOffering } from "@/app/actions/admin";
 import { Eye, Edit2 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const QuillEditor = dynamic(() => import("@/app/upload-offering/_components/QuillWrapper"), {
+  ssr: false,
+  loading: () => <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-xl" />
+});
 
 interface ViewEditOfferingModalProps {
   offering: {
@@ -39,7 +45,7 @@ export function ViewEditOfferingModal({
     setLoading(true);
     setError("");
 
-    const finalContent = contentEditableRef.current?.innerHTML ?? textContent;
+    const finalContent = textContent;
 
     const result = await editOffering(offering.id, {
       offering: finalContent,
@@ -126,20 +132,14 @@ export function ViewEditOfferingModal({
               </div>
               <div className="space-y-2 flex-1 flex flex-col min-h-[300px]">
                 <Label htmlFor="offering-content">
-                  Offering Content (Click text to edit)
+                  Offering Content
                 </Label>
-                <div
-                  ref={contentEditableRef}
-                  id="offering-content"
-                  className="bg-white p-6 rounded-lg border border-gray-200 prose prose-sm max-w-none text-gray-800 flex-1 overflow-y-auto focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent min-h-[300px]"
-                  contentEditable={true}
-                  suppressContentEditableWarning={true}
-                  dangerouslySetInnerHTML={{ __html: textContent }}
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  Formatting is preserved. You can edit the paragraph text
-                  directly.
-                </p>
+                <div className="bg-white rounded-lg border border-gray-200 prose prose-sm max-w-none text-gray-800 flex-1 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent min-h-[300px] [&_.ql-toolbar]:rounded-t-lg [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-gray-50 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-container]:border-none [&_.ql-container]:rounded-b-lg [&_.ql-editor]:min-h-[250px] [&_.ql-editor]:text-base">
+                  <QuillEditor
+                    value={textContent}
+                    onChange={setTextContent}
+                  />
+                </div>
               </div>
             </div>
           )}
