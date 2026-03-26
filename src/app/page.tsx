@@ -1,7 +1,7 @@
-import Hero from "./(user)/home/Hero";
-import BhagwatPadAshtakam from "./(user)/home/BhagwatPadAshtakam";
-import PrabhupadQuotes from "./(user)/home/PrabhupadQuotes";
-import Gallery from "./(user)/home/Gallery";
+import Hero from "@components/Home/Hero";
+import BhagwatPadAshtakam from "@components/Home/BhagwatPadAshtakam";
+import PrabhupadQuotes from "@components/Home/PrabhupadQuotes";
+import Gallery from "@components/Home/Gallery";
 
 export default function Home() {
   return (
