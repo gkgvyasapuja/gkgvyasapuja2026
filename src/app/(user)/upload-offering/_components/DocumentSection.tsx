@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/select";
 import { OfferingFormData } from "./types";
 import { useAiChanges } from "../_hooks/useAiChanges";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 
-const QuillEditor = dynamic(() => import("./QuillWrapper"), {
+/* const QuillEditor = dynamic(() => import("./QuillWrapper"), {
   ssr: false,
   loading: () => (
-    <div className="h-[400px] w-full bg-gray-100 animate-pulse rounded-xl" />
+    <div className="h-100 w-full bg-gray-100 animate-pulse rounded-xl" />
   ),
-});
+}); */
 
 interface Props {
   file: File | null;

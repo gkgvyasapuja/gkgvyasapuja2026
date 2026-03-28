@@ -31,11 +31,11 @@ const SocialMediaLinks = [
 
 const NavLinks = [
   { name: "Home", href: "/" },
-  { name: "Upload Offering", href: "/upload-offering" },
   { name: "About Guru Maharaja", href: "/about" },
+  { name: "Contact Us", href: "/contact-us" },
   { name: "Donate", href: "/donate" },
   { name: "E-Books", href: "/ebooks" },
-  { name: "Contact Us", href: "/contact-us" },
+  { name: "Upload Offering", href: "/upload-offering" },
 ];
 
 export default function Header() {

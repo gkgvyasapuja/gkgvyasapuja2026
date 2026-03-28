@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { Toaster } from "sonner";
 
 import { useOfferingForm } from "../_hooks/useOfferingForm";
 import { useLocationData } from "../_hooks/useLocationData";
@@ -40,6 +39,7 @@ export default function UploadOfferingForm() {
     handleAutoCorrection,
     isFixingText,
     setIsReviewing,
+    isReviewing,
   } = useSubmitOffering(formData, setFormData, file, extractedText, setError);
 
   if (success) {

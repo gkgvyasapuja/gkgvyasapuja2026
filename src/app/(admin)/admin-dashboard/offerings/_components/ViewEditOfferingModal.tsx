@@ -1,6 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import {
+  useState,
+  // useRef
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,16 +12,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+// import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { editOffering } from "@/app/actions/admin";
+import { editOffering } from "@/app/(admin)/actions/admin";
 import { Eye, Edit2 } from "lucide-react";
 import dynamic from "next/dynamic";
 
-const QuillEditor = dynamic(() => import("@/app/upload-offering/_components/QuillWrapper"), {
-  ssr: false,
-  loading: () => <div className="h-[300px] w-full bg-gray-100 animate-pulse rounded-xl" />
-});
+const QuillEditor = dynamic(
+  () => import("@/app/(user)/upload-offering/_components/QuillWrapper"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-75 w-full bg-gray-100 animate-pulse rounded-xl" />
+    ),
+  },
+);
 
 interface ViewEditOfferingModalProps {
   offering: {
@@ -39,7 +47,7 @@ export function ViewEditOfferingModal({
 
   const [textContent, setTextContent] = useState(offering.offering);
   const [language, setLanguage] = useState(offering.language);
-  const contentEditableRef = useRef<HTMLDivElement>(null);
+  // const contentEditableRef = useRef<HTMLDivElement>(null);
 
   async function handleSave() {
     setLoading(true);
@@ -74,7 +82,10 @@ export function ViewEditOfferingModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={handleOpenChange}
+    >
       <DialogTrigger>
         <Button
           variant="ghost"
@@ -85,7 +96,7 @@ export function ViewEditOfferingModal({
           <Eye className="h-4 w-4 text-gray-500" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-175 max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex flex-row justify-between items-center mr-6">
           <DialogTitle>Offering by {offering.userParams}</DialogTitle>
           {!isEditing && (
@@ -120,6 +131,8 @@ export function ViewEditOfferingModal({
                 <Label htmlFor="language">Language</Label>
                 <select
                   id="language"
+                  name="language"
+                  title="language"
                   value={language}
                   onChange={(e) =>
                     setLanguage(e.target.value as "Hindi" | "English")
@@ -130,11 +143,9 @@ export function ViewEditOfferingModal({
                   <option value="Hindi">Hindi</option>
                 </select>
               </div>
-              <div className="space-y-2 flex-1 flex flex-col min-h-[300px]">
-                <Label htmlFor="offering-content">
-                  Offering Content
-                </Label>
-                <div className="bg-white rounded-lg border border-gray-200 prose prose-sm max-w-none text-gray-800 flex-1 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent min-h-[300px] [&_.ql-toolbar]:rounded-t-lg [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-gray-50 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-container]:border-none [&_.ql-container]:rounded-b-lg [&_.ql-editor]:min-h-[250px] [&_.ql-editor]:text-base">
+              <div className="space-y-2 flex-1 flex flex-col min-h-75">
+                <Label htmlFor="offering-content">Offering Content</Label>
+                <div className="bg-white rounded-lg border border-gray-200 prose prose-sm max-w-none text-gray-800 flex-1 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent min-h-75 [&_.ql-toolbar]:rounded-t-lg [&_.ql-toolbar]:border-none [&_.ql-toolbar]:bg-gray-50 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200 [&_.ql-container]:border-none [&_.ql-container]:rounded-b-lg [&_.ql-editor]:min-h-62.5 [&_.ql-editor]:text-base">
                   <QuillEditor
                     value={textContent}
                     onChange={setTextContent}

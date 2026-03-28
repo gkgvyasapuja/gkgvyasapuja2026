@@ -1,10 +1,5 @@
 import Image from "next/image";
-import {
-  BookOpen,
-  Building2,
-  CheckCircle2,
-  Quote,
-} from "lucide-react";
+import { BookOpen, Building2, CheckCircle2, Quote } from "lucide-react";
 
 const About = () => {
   return (
@@ -31,7 +26,7 @@ const About = () => {
             <div className="relative lg:col-span-5">
               <div className="relative mx-auto aspect-4/5 w-full max-w-md overflow-hidden rounded-2xl shadow-lg ring-1 ring-border/80 lg:mx-0">
                 <Image
-                  src="/asset/heroAndGallery/01.webp"
+                  src="/asset/heroAndGallery/main.webp"
                   alt="Guru Maharaja portrait"
                   fill
                   className="object-cover transition-transform duration-700 hover:scale-[1.02]"
@@ -81,8 +76,9 @@ const About = () => {
               <blockquote className="border-l-4 border-[#0a2540]/40 pl-6 text-xl leading-relaxed text-foreground sm:text-2xl">
                 <p className="italic text-muted-foreground">
                   &ldquo;The appearance of a pure devotee is a celebration for
-                  all of humanity, a descent of spiritual grace into the temporal
-                  world to guide lost souls back to their eternal home.&rdquo;
+                  all of humanity, a descent of spiritual grace into the
+                  temporal world to guide lost souls back to their eternal
+                  home.&rdquo;
                 </p>
               </blockquote>
             </div>
@@ -133,21 +129,27 @@ const About = () => {
 
             <article className="flex flex-col rounded-2xl border border-border bg-card p-8 shadow-sm md:col-span-4">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#0a2540] text-white">
-                <BookOpen className="h-6 w-6" aria-hidden />
+                <BookOpen
+                  className="h-6 w-6"
+                  aria-hidden
+                />
               </div>
               <h3 className="mb-3 text-xl font-semibold tracking-tight text-foreground">
                 The Brhat Mrdanga
               </h3>
               <p className="flex-1 leading-relaxed text-muted-foreground">
-                A pioneer in book distribution, bringing the timeless wisdom of the
-                Bhagavad-gita and Srimad Bhagavatam to thousands of hearts across
-                continents.
+                A pioneer in book distribution, bringing the timeless wisdom of
+                the Bhagavad-gita and Srimad Bhagavatam to thousands of hearts
+                across continents.
               </p>
             </article>
 
             <article className="flex flex-col rounded-2xl border border-border bg-card p-8 shadow-sm md:col-span-4">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#0a2540] text-white">
-                <Building2 className="h-6 w-6" aria-hidden />
+                <Building2
+                  className="h-6 w-6"
+                  aria-hidden
+                />
               </div>
               <h3 className="mb-3 text-xl font-semibold tracking-tight text-foreground">
                 Temple Construction
@@ -176,7 +178,7 @@ const About = () => {
                 </div>
                 <div className="relative aspect-video overflow-hidden rounded-xl ring-1 ring-border">
                   <Image
-                    src="/asset/heroAndGallery/03.webp"
+                    src="/asset/heroAndGallery/01.webp"
                     alt="Global preaching"
                     fill
                     className="object-cover"
@@ -224,7 +226,10 @@ const About = () => {
                   "Authoring profound commentaries on Vedic scriptures.",
                   "Mentoring thousands of devotees in their spiritual path.",
                 ].map((item) => (
-                  <li key={item} className="flex gap-3 text-base leading-relaxed sm:text-lg">
+                  <li
+                    key={item}
+                    className="flex gap-3 text-base leading-relaxed sm:text-lg"
+                  >
                     <CheckCircle2
                       className="mt-0.5 h-5 w-5 shrink-0 text-[#ff6b4a]"
                       aria-hidden
