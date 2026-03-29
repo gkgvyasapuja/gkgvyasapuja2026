@@ -28,18 +28,22 @@ export function LocationSection({
 }: Props) {
   return (
     <section>
-      <h3 className="text-2xl font-semibold text-white mb-8 border-b border-white/10 pb-4">
+      <h3 className="text-2xl font-semibold text-black mb-8 border-b border-white/10 pb-4">
         Location Details / स्थान का विवरण
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
-        <FormField label="Country" subLabel="देश" required>
+        <FormField
+          label="Country"
+          subLabel="देश"
+          required
+        >
           <Select
             value={formData.countryId}
             onValueChange={(val) =>
               handleSelectChange("countryId", val as string)
             }
           >
-            <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors">
+            <SelectTrigger className="h-16 w-full py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-md transition-colors">
               <SelectValue placeholder="Select Country">
                 {countries.find((c) => c.id === formData.countryId)?.name ||
                   "Select Country"}
@@ -59,7 +63,11 @@ export function LocationSection({
           </Select>
         </FormField>
 
-        <FormField label="State / Province" subLabel="राज्य / प्रान्त" required>
+        <FormField
+          label="State / Province"
+          subLabel="राज्य / प्रान्त"
+          required
+        >
           <Select
             value={formData.stateId}
             onValueChange={(val) =>
@@ -67,7 +75,7 @@ export function LocationSection({
             }
             disabled={!formData.countryId}
           >
-            <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors disabled:opacity-50 disabled:bg-gray-100">
+            <SelectTrigger className="h-16 w-full py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-md transition-colors disabled:opacity-50 disabled:bg-gray-100">
               <SelectValue placeholder="Select State">
                 {states.find((s) => s.id === formData.stateId)?.name ||
                   "Select State"}
@@ -87,13 +95,17 @@ export function LocationSection({
           </Select>
         </FormField>
 
-        <FormField label="City" subLabel="शहर" required>
+        <FormField
+          label="City"
+          subLabel="शहर"
+          required
+        >
           <Select
             value={formData.cityId}
             onValueChange={(val) => handleSelectChange("cityId", val as string)}
             disabled={!formData.stateId}
           >
-            <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors disabled:opacity-50 disabled:bg-gray-100">
+            <SelectTrigger className="h-16 w-full py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-md transition-colors disabled:opacity-50 disabled:bg-gray-100">
               <SelectValue placeholder="Select City">
                 {cities.find((c) => c.id === formData.cityId)?.name ||
                   "Select City"}
@@ -113,7 +125,11 @@ export function LocationSection({
           </Select>
         </FormField>
 
-        <FormField label="Temple / Center" subLabel="मंदिर / केंद्र" required>
+        <FormField
+          label="Temple / Center"
+          subLabel="मंदिर / केंद्र"
+          required
+        >
           <Select
             value={formData.templeId}
             onValueChange={(val) =>
@@ -121,7 +137,7 @@ export function LocationSection({
             }
             disabled={!formData.cityId}
           >
-            <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors disabled:opacity-50 disabled:bg-gray-100">
+            <SelectTrigger className="h-16 w-full py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-md transition-colors disabled:opacity-50 disabled:bg-gray-100">
               <SelectValue placeholder="Select Temple">
                 {temples.find((t) => t.id === formData.templeId)?.name ||
                   "Select Temple"}

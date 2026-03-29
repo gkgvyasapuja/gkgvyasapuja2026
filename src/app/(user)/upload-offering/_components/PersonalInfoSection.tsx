@@ -25,11 +25,15 @@ export function PersonalInfoSection({
 }: Props) {
   return (
     <section>
-      <h3 className="text-2xl font-semibold text-white mb-8 border-b border-white/10 pb-4">
+      <h3 className="text-2xl font-semibold text-black mb-8 border-b border-white/10 pb-4">
         Personal Information / व्यक्तिगत जानकारी
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
-        <FormField label="First Name" subLabel="पहला नाम" required>
+        <FormField
+          label="First Name"
+          subLabel="पहला नाम"
+          required
+        >
           <Input
             name="firstName"
             value={formData.firstName}
@@ -38,7 +42,11 @@ export function PersonalInfoSection({
             className="h-12 px-5 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-2xl transition-colors"
           />
         </FormField>
-        <FormField label="Last Name" subLabel="अंतिम नाम" required>
+        <FormField
+          label="Last Name"
+          subLabel="अंतिम नाम"
+          required
+        >
           <Input
             name="lastName"
             value={formData.lastName}
@@ -47,7 +55,11 @@ export function PersonalInfoSection({
             className="h-12 px-5 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors"
           />
         </FormField>
-        <FormField label="Email" subLabel="ईमेल" required>
+        <FormField
+          label="Email"
+          subLabel="ईमेल"
+          required
+        >
           <Input
             name="email"
             type="email"
@@ -57,7 +69,11 @@ export function PersonalInfoSection({
             className="h-12 px-5 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors"
           />
         </FormField>
-        <FormField label="Phone" subLabel="फ़ोन नंबर" required>
+        <FormField
+          label="Phone"
+          subLabel="फ़ोन नंबर"
+          required
+        >
           <Input
             name="phone"
             value={formData.phone}
@@ -76,7 +92,7 @@ export function PersonalInfoSection({
             value={formData.gender}
             onValueChange={(val) => handleSelectChange("gender", val as string)}
           >
-            <SelectTrigger className="h-12 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-lg transition-colors">
+            <SelectTrigger className="h-12 w-full py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-md transition-colors">
               <SelectValue placeholder="Select Gender" />
             </SelectTrigger>
             <SelectContent>

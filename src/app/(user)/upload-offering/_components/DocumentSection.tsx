@@ -69,7 +69,7 @@ export function DocumentSection({
           <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
             <UploadCloud
               className={`w-16 h-16 mb-6 transition-colors ${
-                file ? "text-white" : "text-gray-400 group-hover:text-white"
+                file ? "text-white" : "text-gray-400 "
               }`}
             />
             <p className="mb-2 text-xl text-white">
@@ -147,7 +147,7 @@ export function DocumentSection({
               </div>
               <div className="w-full h-100 bg-white border border-gray-200 rounded-2xl p-1 focus-within:ring-2 focus-within:ring-[#0a2540]/20 focus-within:border-[#0a2540]/30 transition-shadow shadow-sm overflow-hidden">
                 <div
-                  ref={contentEditableRef}
+                  // ref={contentEditableRef}
                   className="w-full h-full p-6 bg-transparent text-gray-800 border-none outline-none resize-none rounded-xl leading-relaxed text-xl overflow-y-auto [&>p]:mb-0 [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-4 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4"
                   contentEditable
                   suppressContentEditableWarning

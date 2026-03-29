@@ -31,7 +31,7 @@ const SocialMediaLinks = [
 
 const NavLinks = [
   { name: "Home", href: "/" },
-  { name: "About Guru Maharaja", href: "/about" },
+  { name: "About", href: "/about" },
   { name: "Contact Us", href: "/contact-us" },
   { name: "Donate", href: "/donate" },
   { name: "E-Books", href: "/ebooks" },

@@ -36,7 +36,7 @@ export function InitiationSection({
         />
         <label
           htmlFor="initiated-checkbox"
-          className="text-2xl font-semibold text-white cursor-pointer select-none"
+          className="text-2xl font-semibold text-black cursor-pointer select-none"
         >
           Are you initiated? / क्या आप दीक्षित हैं?
         </label>
@@ -44,7 +44,11 @@ export function InitiationSection({
 
       {formData.initiated && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-8 animate-in slide-in-from-top-4 fade-in duration-500">
-          <FormField label="Initiated Name" subLabel="दीक्षित नाम" required>
+          <FormField
+            label="Initiated Name"
+            subLabel="दीक्षित नाम"
+            required
+          >
             <Input
               name="initiatedName"
               value={formData.initiatedName}
@@ -64,7 +68,7 @@ export function InitiationSection({
                 handleSelectChange("initiationType", val as string)
               }
             >
-              <SelectTrigger className="h-12 py-6 px-4 bg-white border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors shadow-sm">
+              <SelectTrigger className="h-12 w-full py-6 px-4 bg-white border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-md transition-colors shadow-sm">
                 <SelectValue placeholder="Select Type" />
               </SelectTrigger>
               <SelectContent>

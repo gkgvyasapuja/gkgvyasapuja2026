@@ -48,7 +48,7 @@ export default function UploadOfferingForm() {
 
   return (
     <>
-      <div className="w-full max-w-4xl mx-auto bg-[#0a2540] rounded-3xl shadow-2xl overflow-hidden font-sans border border-white/10 relative">
+      <div className="w-full max-w-6xl mx-auto text-black rounded-3xl shadow-2xl overflow-hidden font-sans border border-black/10 relative">
         <div className="p-8 md:p-14">
           {/* Stepper UI */}
           <div className="flex items-center justify-between mb-12 relative px-4 md:px-10">
