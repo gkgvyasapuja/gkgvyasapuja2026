@@ -1,4 +1,5 @@
 import React from "react";
+import dynamic from "next/dynamic";
 import { UploadCloud, Loader2, FileText, X } from "lucide-react";
 import {
   Select,
@@ -9,14 +10,13 @@ import {
 } from "@/components/ui/select";
 import { OfferingFormData } from "./types";
 import { useAiChanges } from "../_hooks/useAiChanges";
-// import dynamic from "next/dynamic";
 
-/* const QuillEditor = dynamic(() => import("./QuillWrapper"), {
+const QuillEditor = dynamic(() => import("./QuillWrapper"), {
   ssr: false,
   loading: () => (
-    <div className="h-100 w-full bg-gray-100 animate-pulse rounded-xl" />
+    <div className="min-h-[320px] w-full bg-gray-100 animate-pulse rounded-xl" />
   ),
-}); */
+});
 
 interface Props {
   file: File | null;
@@ -145,13 +145,10 @@ export function DocumentSection({
                   </span>
                 </div>
               </div>
-              <div className="w-full h-100 bg-white border border-gray-200 rounded-2xl p-1 focus-within:ring-2 focus-within:ring-[#0a2540]/20 focus-within:border-[#0a2540]/30 transition-shadow shadow-sm overflow-hidden">
-                <div
-                  className="w-full h-full p-6 bg-transparent text-gray-800 border-none outline-none resize-none rounded-xl leading-relaxed text-xl overflow-y-auto [&>p]:mb-0 [&>h1]:text-2xl [&>h1]:font-bold [&>h1]:mb-4 [&>h2]:text-xl [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4"
-                  contentEditable
-                  suppressContentEditableWarning
-                  onInput={(e) => setExtractedText(e.currentTarget.innerHTML)}
-                  onBlur={(e) => setExtractedText(e.currentTarget.innerHTML)}
+              <div className="upload-offering-quill w-full rounded-2xl border border-gray-200 bg-white shadow-sm focus-within:border-[#0a2540]/30 focus-within:ring-2 focus-within:ring-[#0a2540]/20 overflow-hidden">
+                <QuillEditor
+                  value={extractedText}
+                  onChange={setExtractedText}
                 />
               </div>
 

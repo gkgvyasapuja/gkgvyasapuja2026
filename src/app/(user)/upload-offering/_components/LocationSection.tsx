@@ -119,7 +119,7 @@ export function LocationSection({
             onValueChange={(val) =>
               handleSelectChange("templeId", val as string)
             }
-            disabled={!formData.cityId}
+            disabled={!formData.stateId}
           >
             <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors disabled:opacity-50 disabled:bg-gray-100">
               <SelectValue placeholder="Select Temple">

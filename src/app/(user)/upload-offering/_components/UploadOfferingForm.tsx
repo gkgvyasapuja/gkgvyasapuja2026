@@ -102,56 +102,64 @@ export default function UploadOfferingForm() {
           )}
 
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <PersonalInfoSection
-              formData={formData}
-              handleInputChange={handleInputChange}
-              handleSelectChange={handleSelectChange}
-            />
-            <InitiationSection
-              formData={formData}
-              handleInputChange={handleInputChange}
-              handleSelectChange={handleSelectChange}
-            />
-            <LocationSection
-              formData={formData}
-              handleSelectChange={handleSelectChange}
-              countries={countries}
-              states={states}
-              cities={cities}
-              temples={temples}
-            />
-            <DocumentSection
-              file={file}
-              handleFileChange={(e) => {
-                handleFileChange(e);
-                setIsReviewing(false);
-              }}
-              isParsing={isParsing}
-              extractedText={extractedText}
-              setExtractedText={(text) => {
-                setExtractedText(text);
-                setIsReviewing(false);
-              }}
-              formData={formData}
-              handleSelectChange={handleSelectChange}
-            />
-            {isReviewing && (
-              <div className="p-5 bg-blue-500/10 border border-blue-400/30 rounded-2xl text-blue-100 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
-                <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 mt-0.5 text-blue-300">
-                  i
-                </div>
-                <div className="flex flex-col gap-1">
-                  <p className="font-semibold text-blue-200">
-                    Review your offering
-                  </p>
-                  <p className="text-md text-blue-100/80">
-                    We have quickly checked your document&apos;s text to ensure
-                    proper spelling and formatting. Please review the text above
-                    to make sure it is correct. If you agree, click
-                    &ldquo;Confirm & Submit&rdquo; below.
-                  </p>
-                </div>
-              </div>
+            {step === 1 && (
+              <>
+                <PersonalInfoSection
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  handleSelectChange={handleSelectChange}
+                />
+                <InitiationSection
+                  formData={formData}
+                  handleInputChange={handleInputChange}
+                  handleSelectChange={handleSelectChange}
+                />
+                <LocationSection
+                  formData={formData}
+                  handleSelectChange={handleSelectChange}
+                  countries={countries}
+                  states={states}
+                  cities={cities}
+                  temples={temples}
+                />
+              </>
+            )}
+            {(step === 2 || step === 3) && (
+              <>
+                <DocumentSection
+                  file={file}
+                  handleFileChange={(e) => {
+                    handleFileChange(e);
+                    setIsReviewing(false);
+                  }}
+                  isParsing={isParsing}
+                  extractedText={extractedText}
+                  setExtractedText={(text) => {
+                    setExtractedText(text);
+                    setIsReviewing(false);
+                  }}
+                  formData={formData}
+                  handleSelectChange={handleSelectChange}
+                />
+                {step === 3 && isReviewing && (
+                  <div className="p-5 bg-blue-500/10 border border-blue-400/30 rounded-2xl text-blue-100 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 mt-0.5 text-blue-300">
+                      i
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <p className="font-semibold text-blue-200">
+                        Review your offering
+                      </p>
+                      <p className="text-md text-blue-100/80">
+                        We have quickly checked your document&apos;s text to
+                        ensure proper spelling and formatting. Please review the
+                        text above to make sure it is correct. If you agree,
+                        click &ldquo;Confirm & Submit&rdquo; below.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

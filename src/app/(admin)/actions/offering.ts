@@ -50,12 +50,12 @@ export async function getCities(stateId: string) {
   }
 }
 
-export async function getTemples(cityId: string) {
+export async function getTemplesByStateId(stateId: string) {
   try {
     const data = await db
       .select()
       .from(temples)
-      .where(eq(temples.cityId, cityId))
+      .where(eq(temples.stateId, stateId))
       .orderBy(temples.name);
     return data;
   } catch (error) {
@@ -117,7 +117,6 @@ export async function parseDocx(formData: FormData) {
       { buffer },
       { ignoreEmptyParagraphs: false },
     );
-    console.log(result);
     return { success: true, text: result.value };
   } catch (error) {
     console.error("Failed to parse docx:", error);

@@ -4,7 +4,7 @@ import {
   getCountries,
   getStates,
   getCities,
-  getTemples,
+  getTemplesByStateId,
 } from "@/app/(admin)/actions/offering";
 import { OfferingFormData } from "../_components/types";
 
@@ -37,22 +37,15 @@ export function useLocationData(
     }
   }, [formData.countryId, setFormData]);
 
-  // Fetch Cities when State changes
+  // Fetch cities and temples when state changes (cities filtered by state; temples same state)
   useEffect(() => {
     if (formData.stateId) {
-      getCities(formData.stateId).then(setCities);
-      setFormData((prev) => ({ ...prev, cityId: "", templeId: "" }));
       setTemples([]);
+      getCities(formData.stateId).then(setCities);
+      getTemplesByStateId(formData.stateId).then(setTemples);
+      setFormData((prev) => ({ ...prev, cityId: "", templeId: "" }));
     }
   }, [formData.stateId, setFormData]);
-
-  // Fetch Temples when City changes
-  useEffect(() => {
-    if (formData.cityId) {
-      getTemples(formData.cityId).then(setTemples);
-      setFormData((prev) => ({ ...prev, templeId: "" }));
-    }
-  }, [formData.cityId, setFormData]);
 
   return { countries, states, cities, temples };
 }

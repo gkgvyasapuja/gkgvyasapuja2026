@@ -129,3 +129,27 @@
     @apply font-sans;
   }
 }
+
+/* Upload offering: Quill editor height + toolbar layout */
+.upload-offering-quill .custom-quill-container {
+  display: flex;
+  flex-direction: column;
+}
+.upload-offering-quill .custom-quill-container .ql-toolbar {
+  flex-shrink: 0;
+  border-top-left-radius: 0.75rem;
+  border-top-right-radius: 0.75rem;
+  border-color: rgb(229 231 235);
+}
+.upload-offering-quill .custom-quill-container .ql-container {
+  flex: 1;
+  min-height: 320px;
+  border-bottom-left-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+  border-color: rgb(229 231 235);
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+.upload-offering-quill .custom-quill-container .ql-editor {
+  min-height: 320px;
+}
