@@ -15,6 +15,23 @@ export async function requireAdminSession(): Promise<void> {
   }
 }
 
+/** For API routes: same access as offerings UI (admin or valid maintainer). */
+export async function canManageOfferings(): Promise<boolean> {
+  if (await getAdminSession()) return true;
+
+  const c = await cookies();
+  const mid = c.get("maintainer_session")?.value;
+  if (!mid) return false;
+
+  const row = await db
+    .select({ id: maintainers.id })
+    .from(maintainers)
+    .where(eq(maintainers.id, mid))
+    .limit(1);
+
+  return !!row[0];
+}
+
 export async function assertCanManageOfferings(): Promise<void> {
   if (await getAdminSession()) return;
 

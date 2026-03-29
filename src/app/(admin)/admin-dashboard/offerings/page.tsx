@@ -1,11 +1,12 @@
+import { redirect } from "next/navigation";
 import {
   getAdminOfferings,
-  getCountries,
-  getStates,
-  getCities,
-  getTemples,
+  resolveOfferingFilterSelections,
 } from "@/app/(admin)/actions/admin";
 import { OfferingsListPage } from "@/components/offerings/OfferingsListPage";
+import { buildOfferingsListUrl } from "@/lib/build-offerings-list-url";
+
+const BASE = "/admin-dashboard/offerings";
 
 export default async function OfferingsPage({
   searchParams,
@@ -13,28 +14,43 @@ export default async function OfferingsPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const sp = await searchParams;
-  const countryId = sp.country as string | undefined;
-  const stateId = sp.state as string | undefined;
-  const cityId = sp.city as string | undefined;
-  const templeId = sp.temple as string | undefined;
-  const language = sp.language as string | undefined;
+  const { filter, initialSelections } = await resolveOfferingFilterSelections({
+    country: sp.country as string | undefined,
+    state: sp.state as string | undefined,
+    city: sp.city as string | undefined,
+    temple: sp.temple as string | undefined,
+  });
 
-  const [offerings, countries, states, cities, temples] = await Promise.all([
-    getAdminOfferings({ countryId, stateId, cityId, templeId, language }),
-    getCountries(),
-    getStates(),
-    getCities(),
-    getTemples(),
-  ]);
+  const pageRaw = sp.page;
+  const parsedPage =
+    typeof pageRaw === "string" ? parseInt(pageRaw, 10) : Number.NaN;
+  const page =
+    Number.isFinite(parsedPage) && parsedPage >= 1 ? parsedPage : 1;
+
+  const language = sp.language as string | undefined;
+  const dateFrom = sp.dateFrom as string | undefined;
+  const dateTo = sp.dateTo as string | undefined;
+
+  const result = await getAdminOfferings({
+    ...filter,
+    language,
+    dateFrom,
+    dateTo,
+    page,
+  });
+
+  if (result.totalPages > 0 && page > result.totalPages) {
+    redirect(buildOfferingsListUrl(BASE, sp, result.totalPages));
+  }
 
   return (
     <OfferingsListPage
-      offerings={offerings}
-      countries={countries}
-      states={states}
-      cities={cities}
-      temples={temples}
-      basePath="/admin-dashboard/offerings"
+      offerings={result.items}
+      total={result.total}
+      page={result.page}
+      totalPages={result.totalPages}
+      initialSelections={initialSelections}
+      basePath={BASE}
     />
   );
 }

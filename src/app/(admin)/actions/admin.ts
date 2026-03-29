@@ -11,7 +11,7 @@ import {
   offerings,
   users,
 } from "@/db/schema";
-import { eq, desc, and, asc, count, ilike, or } from "drizzle-orm";
+import { eq, desc, and, asc, count, ilike, or, gte, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 // --- Country Actions ---
@@ -62,11 +62,14 @@ function sanitizeIlikePattern(q: string) {
 
 export async function searchCountries(query: string) {
   const safe = sanitizeIlikePattern(query);
-  if (safe.length === 0) return [];
-  const pattern = `%${safe}%`;
-  return db
+  const base = db
     .select({ id: countries.id, name: countries.name })
-    .from(countries)
+    .from(countries);
+  if (safe.length === 0) {
+    return base.orderBy(asc(countries.name)).limit(SEARCH_LIMIT);
+  }
+  const pattern = `%${safe}%`;
+  return base
     .where(ilike(countries.name, pattern))
     .orderBy(asc(countries.name))
     .limit(SEARCH_LIMIT);
@@ -86,15 +89,22 @@ export async function searchStates(
   options?: { countryId?: string },
 ) {
   const safe = sanitizeIlikePattern(query);
-  if (safe.length === 0) return [];
+  const base = db
+    .select({ id: states.id, name: states.name })
+    .from(states);
+  const countryFilter = options?.countryId
+    ? eq(states.countryId, options.countryId)
+    : undefined;
+  if (safe.length === 0) {
+    const q = countryFilter ? base.where(countryFilter) : base;
+    return q.orderBy(asc(states.name)).limit(SEARCH_LIMIT);
+  }
   const pattern = `%${safe}%`;
   const nameMatch = ilike(states.name, pattern);
-  const whereExpr = options?.countryId
-    ? and(nameMatch, eq(states.countryId, options.countryId))
+  const whereExpr = countryFilter
+    ? and(nameMatch, countryFilter)
     : nameMatch;
-  return db
-    .select({ id: states.id, name: states.name })
-    .from(states)
+  return base
     .where(whereExpr)
     .orderBy(asc(states.name))
     .limit(SEARCH_LIMIT);
@@ -102,11 +112,146 @@ export async function searchStates(
 
 export async function getStateById(id: string) {
   const rows = await db
-    .select({ id: states.id, name: states.name })
+    .select({
+      id: states.id,
+      name: states.name,
+      countryId: states.countryId,
+    })
     .from(states)
     .where(eq(states.id, id))
     .limit(1);
   return rows[0] ?? null;
+}
+
+export async function getCityById(id: string) {
+  const rows = await db
+    .select({
+      id: cities.id,
+      name: cities.name,
+      stateId: cities.stateId,
+    })
+    .from(cities)
+    .where(eq(cities.id, id))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function getTempleById(id: string) {
+  const rows = await db
+    .select({
+      id: temples.id,
+      name: temples.name,
+      cityId: temples.cityId,
+      stateId: temples.stateId,
+    })
+    .from(temples)
+    .where(eq(temples.id, id))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function searchCities(
+  query: string,
+  options?: { stateId?: string; countryId?: string },
+) {
+  const safe = sanitizeIlikePattern(query);
+  const joinBase = db
+    .select({ id: cities.id, name: cities.name })
+    .from(cities)
+    .innerJoin(states, eq(cities.stateId, states.id));
+  const conds = [];
+  if (options?.stateId) conds.push(eq(cities.stateId, options.stateId));
+  if (options?.countryId) conds.push(eq(states.countryId, options.countryId));
+  if (safe.length === 0) {
+    const whereClause = conds.length > 0 ? and(...conds) : undefined;
+    const q = whereClause ? joinBase.where(whereClause) : joinBase;
+    return q.orderBy(asc(cities.name)).limit(SEARCH_LIMIT);
+  }
+  const pattern = `%${safe}%`;
+  conds.push(ilike(cities.name, pattern));
+  const whereClause = and(...conds);
+  return joinBase
+    .where(whereClause)
+    .orderBy(asc(cities.name))
+    .limit(SEARCH_LIMIT);
+}
+
+export async function searchTemples(
+  query: string,
+  options?: { cityId?: string; stateId?: string },
+) {
+  const safe = sanitizeIlikePattern(query);
+  const base = db
+    .select({ id: temples.id, name: temples.name })
+    .from(temples);
+  const conds = [];
+  if (options?.cityId) conds.push(eq(temples.cityId, options.cityId));
+  if (options?.stateId) conds.push(eq(temples.stateId, options.stateId));
+  if (safe.length === 0) {
+    const whereClause = conds.length > 0 ? and(...conds) : undefined;
+    const q = whereClause ? base.where(whereClause) : base;
+    return q.orderBy(asc(temples.name)).limit(SEARCH_LIMIT);
+  }
+  const pattern = `%${safe}%`;
+  conds.push(ilike(temples.name, pattern));
+  const whereClause = and(...conds);
+  return base
+    .where(whereClause)
+    .orderBy(asc(temples.name))
+    .limit(SEARCH_LIMIT);
+}
+
+/** Resolve hierarchy labels for filter comboboxes when URL omits parent ids. */
+export async function resolveOfferingFilterSelections(raw: {
+  country?: string;
+  state?: string;
+  city?: string;
+  temple?: string;
+}) {
+  const pCountry = raw.country;
+  const pState = raw.state;
+  const pCity = raw.city;
+  const pTemple = raw.temple;
+
+  let cityId = pCity;
+  let stateId = pState;
+
+  const templeRow = pTemple ? await getTempleById(pTemple) : null;
+  if (templeRow) {
+    if (!cityId) cityId = templeRow.cityId;
+    if (!stateId) stateId = templeRow.stateId;
+  }
+
+  const cityRow = cityId ? await getCityById(cityId) : null;
+  if (cityRow && !pState) stateId = cityRow.stateId;
+
+  const stateRow = stateId ? await getStateById(stateId) : null;
+  const countryId = pCountry ?? stateRow?.countryId;
+
+  const [cRow, sRow, ciRow, tRow] = await Promise.all([
+    countryId ? getCountryById(countryId) : null,
+    stateId ? getStateById(stateId) : null,
+    cityId ? getCityById(cityId) : null,
+    pTemple ? getTempleById(pTemple) : null,
+  ]);
+
+  const toItem = (r: { id: string; name: string } | null) =>
+    r ? { id: r.id, name: r.name } : null;
+
+  return {
+    filter: {
+      countryId: pCountry,
+      stateId: pState,
+      cityId: pCity,
+      templeId: pTemple,
+    },
+    initialSelections: {
+      country: toItem(cRow),
+      state: toItem(sRow),
+      city: toItem(ciRow),
+      temple: toItem(tRow),
+    },
+  };
 }
 
 export async function addCountry(data: typeof countries.$inferInsert) {
@@ -384,15 +529,30 @@ export async function addBook(data: typeof books.$inferInsert) {
 
 // --- Offerings Actions ---
 
-export async function getAdminOfferings(filters?: {
+const DEFAULT_OFFERINGS_PAGE_SIZE = 20;
+const MAX_OFFERINGS_PAGE_SIZE = 100;
+
+function parseIsoDateStart(s?: string) {
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return undefined;
+  const d = new Date(`${s}T00:00:00.000Z`);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+function parseIsoDateEnd(s?: string) {
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return undefined;
+  const d = new Date(`${s}T23:59:59.999Z`);
+  return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+function buildOfferingWhereConditions(filters?: {
   countryId?: string;
   stateId?: string;
   cityId?: string;
   templeId?: string;
   language?: string;
+  dateFrom?: string;
+  dateTo?: string;
 }) {
-  await assertCanManageOfferings();
-
   const conditions = [];
 
   if (filters?.countryId) {
@@ -408,10 +568,107 @@ export async function getAdminOfferings(filters?: {
     conditions.push(eq(users.templeId, filters.templeId));
   }
   if (filters?.language) {
-    conditions.push(eq(offerings.language, filters.language as any));
+    conditions.push(eq(offerings.language, filters.language as "Hindi" | "English"));
+  }
+  const from = parseIsoDateStart(filters?.dateFrom);
+  if (from) {
+    conditions.push(gte(offerings.createdAt, from));
+  }
+  const to = parseIsoDateEnd(filters?.dateTo);
+  if (to) {
+    conditions.push(lte(offerings.createdAt, to));
   }
 
-  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+  return conditions.length > 0 ? and(...conditions) : undefined;
+}
+
+export async function getAdminOfferings(filters?: {
+  countryId?: string;
+  stateId?: string;
+  cityId?: string;
+  templeId?: string;
+  language?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  await assertCanManageOfferings();
+
+  const pageSize = Math.min(
+    Math.max(filters?.pageSize ?? DEFAULT_OFFERINGS_PAGE_SIZE, 1),
+    MAX_OFFERINGS_PAGE_SIZE,
+  );
+  const page = Math.max(filters?.page ?? 1, 1);
+  const offset = (page - 1) * pageSize;
+
+  const whereClause = buildOfferingWhereConditions(filters);
+
+  const listQuery = db
+    .select({
+      id: offerings.id,
+      year: offerings.year,
+      offering: offerings.offering,
+      language: offerings.language,
+      createdAt: offerings.createdAt,
+      user: {
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        initiatedName: users.initiatedName,
+        phone: users.phone,
+        countryId: users.countryId,
+        stateId: users.stateId,
+        cityId: users.cityId,
+        templeId: users.templeId,
+      },
+      countryName: countries.name,
+      stateName: states.name,
+      cityName: cities.name,
+      templeName: temples.name,
+    })
+    .from(offerings)
+    .innerJoin(users, eq(offerings.userId, users.id))
+    .leftJoin(countries, eq(users.countryId, countries.id))
+    .leftJoin(states, eq(users.stateId, states.id))
+    .leftJoin(cities, eq(users.cityId, cities.id))
+    .leftJoin(temples, eq(users.templeId, temples.id))
+    .where(whereClause)
+    .orderBy(desc(offerings.createdAt))
+    .limit(pageSize)
+    .offset(offset);
+
+  const countQuery = db
+    .select({ total: count() })
+    .from(offerings)
+    .innerJoin(users, eq(offerings.userId, users.id))
+    .where(whereClause);
+
+  const [items, countRows] = await Promise.all([listQuery, countQuery]);
+  const total = Number(countRows[0]?.total ?? 0);
+
+  return {
+    items,
+    total,
+    page,
+    pageSize,
+    totalPages: total === 0 ? 0 : Math.ceil(total / pageSize),
+  };
+}
+
+const MAX_EXPORT_ROWS = 10_000;
+
+export async function getAdminOfferingsForExport(filters?: {
+  countryId?: string;
+  stateId?: string;
+  cityId?: string;
+  templeId?: string;
+  language?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}) {
+  /** Auth must be checked by the caller (e.g. API route via `canManageOfferings`). */
+  const whereClause = buildOfferingWhereConditions(filters);
 
   return db
     .select({
@@ -425,17 +682,31 @@ export async function getAdminOfferings(filters?: {
         firstName: users.firstName,
         lastName: users.lastName,
         initiatedName: users.initiatedName,
+        phone: users.phone,
         countryId: users.countryId,
         stateId: users.stateId,
         cityId: users.cityId,
         templeId: users.templeId,
       },
+      countryName: countries.name,
+      stateName: states.name,
+      cityName: cities.name,
+      templeName: temples.name,
     })
     .from(offerings)
     .innerJoin(users, eq(offerings.userId, users.id))
+    .leftJoin(countries, eq(users.countryId, countries.id))
+    .leftJoin(states, eq(users.stateId, states.id))
+    .leftJoin(cities, eq(users.cityId, cities.id))
+    .leftJoin(temples, eq(users.templeId, temples.id))
     .where(whereClause)
-    .orderBy(desc(offerings.createdAt));
+    .orderBy(desc(offerings.createdAt))
+    .limit(MAX_EXPORT_ROWS);
 }
+
+export type AdminOfferingExportRow = Awaited<
+  ReturnType<typeof getAdminOfferingsForExport>
+>[number];
 
 export async function editOffering(
   id: string,

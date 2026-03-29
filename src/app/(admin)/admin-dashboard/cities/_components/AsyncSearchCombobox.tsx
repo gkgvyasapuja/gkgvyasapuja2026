@@ -61,10 +61,6 @@ export function AsyncSearchCombobox({
 
   const runSearch = useCallback(
     async (q: string) => {
-      if (!q.trim()) {
-        setResults([]);
-        return;
-      }
       setLoading(true);
       try {
         const items = await search(q.trim());
@@ -138,7 +134,7 @@ export function AsyncSearchCombobox({
               </li>
             ) : results.length === 0 ? (
               <li className="px-3 py-2 text-sm text-muted-foreground">
-                {inputValue.trim() ? emptyMessage : "Type to search"}
+                {emptyMessage}
               </li>
             ) : (
               results.map((item) => (

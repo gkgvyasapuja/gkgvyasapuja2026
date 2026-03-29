@@ -1,131 +1,197 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  searchCountries,
+  searchStates,
+  searchCities,
+  searchTemples,
+} from "@/app/(admin)/actions/admin";
+import {
+  AsyncSearchCombobox,
+  type ComboboxItem,
+} from "@/app/(admin)/admin-dashboard/cities/_components/AsyncSearchCombobox";
 
-type LocationItem = { id: string; name: string };
+export interface OfferingsFilterInitialSelections {
+  country: ComboboxItem | null;
+  state: ComboboxItem | null;
+  city: ComboboxItem | null;
+  temple: ComboboxItem | null;
+}
 
 interface OfferingsFilterProps {
-  countries: LocationItem[];
-  states: LocationItem[];
-  cities: LocationItem[];
-  temples: LocationItem[];
-  /** Base path for offerings list (e.g. admin vs maintainer dashboard). */
   basePath?: string;
+  initialSelections: OfferingsFilterInitialSelections;
 }
 
 export function OfferingsFilter({
-  countries,
-  states,
-  cities,
-  temples,
   basePath = "/admin-dashboard/offerings",
+  initialSelections,
 }: OfferingsFilterProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentCountry = searchParams.get("country") || "";
-  const currentState = searchParams.get("state") || "";
-  const currentCity = searchParams.get("city") || "";
-  const currentTemple = searchParams.get("temple") || "";
   const currentLanguage = searchParams.get("language") || "";
+  const dateFrom = searchParams.get("dateFrom") || "";
+  const dateTo = searchParams.get("dateTo") || "";
 
-  const handleFilterChange = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    router.push(`${basePath}?${params.toString()}`);
-  };
+  const pushWithParams = useCallback(
+    (mutate: (p: URLSearchParams) => void) => {
+      const next = new URLSearchParams(searchParams.toString());
+      next.delete("page");
+      mutate(next);
+      const q = next.toString();
+      router.push(q ? `${basePath}?${q}` : basePath);
+    },
+    [basePath, router, searchParams],
+  );
 
-  const handleClear = () => {
-    router.push(basePath);
-  };
+  const searchCountriesCb = useCallback(
+    (q: string) => searchCountries(q),
+    [],
+  );
+
+  const searchStatesCb = useCallback(
+    (q: string) =>
+      searchStates(q, {
+        countryId: initialSelections.country?.id,
+      }),
+    [initialSelections.country?.id],
+  );
+
+  const searchCitiesCb = useCallback(
+    (q: string) =>
+      searchCities(q, {
+        stateId: initialSelections.state?.id,
+        countryId: initialSelections.country?.id,
+      }),
+    [initialSelections.country?.id, initialSelections.state?.id],
+  );
+
+  const searchTemplesCb = useCallback(
+    (q: string) =>
+      searchTemples(q, {
+        cityId: initialSelections.city?.id,
+        stateId: initialSelections.state?.id,
+      }),
+    [initialSelections.city?.id, initialSelections.state?.id],
+  );
+
+  const hasActiveFilters = useMemo(() => {
+    return (
+      !!initialSelections.country ||
+      !!initialSelections.state ||
+      !!initialSelections.city ||
+      !!initialSelections.temple ||
+      !!currentLanguage ||
+      !!dateFrom ||
+      !!dateTo
+    );
+  }, [
+    initialSelections,
+    currentLanguage,
+    dateFrom,
+    dateTo,
+  ]);
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4 tracking-tight">
         Filter Offerings
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="country-filter" className="text-sm font-medium">
-            Country
-          </Label>
-          <select
-            id="country-filter"
-            value={currentCountry}
-            onChange={(e) => handleFilterChange("country", e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="">All Countries</option>
-            {countries.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <AsyncSearchCombobox
+          id="offerings-country"
+          label="Country"
+          placeholder="Search country…"
+          search={searchCountriesCb}
+          value={initialSelections.country}
+          emptyMessage="No countries found"
+          onChange={(item) => {
+            pushWithParams((p) => {
+              if (item) p.set("country", item.id);
+              else p.delete("country");
+              p.delete("state");
+              p.delete("city");
+              p.delete("temple");
+            });
+          }}
+        />
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="state-filter" className="text-sm font-medium">
-            State
-          </Label>
-          <select
-            id="state-filter"
-            value={currentState}
-            onChange={(e) => handleFilterChange("state", e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="">All States</option>
-            {states.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <AsyncSearchCombobox
+          id="offerings-state"
+          label="State"
+          placeholder={
+            initialSelections.country || initialSelections.state
+              ? "Search state…"
+              : "Select a country first"
+          }
+          search={searchStatesCb}
+          value={initialSelections.state}
+          disabled={
+            !initialSelections.country && !initialSelections.state
+          }
+          emptyMessage="No states found"
+          onChange={(item) => {
+            pushWithParams((p) => {
+              if (item) p.set("state", item.id);
+              else p.delete("state");
+              p.delete("city");
+              p.delete("temple");
+            });
+          }}
+        />
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="city-filter" className="text-sm font-medium">
-            City
-          </Label>
-          <select
-            id="city-filter"
-            value={currentCity}
-            onChange={(e) => handleFilterChange("city", e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="">All Cities</option>
-            {cities.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <AsyncSearchCombobox
+          id="offerings-city"
+          label="City"
+          placeholder={
+            initialSelections.state || initialSelections.country
+              ? "Search city…"
+              : "Select country or state first"
+          }
+          search={searchCitiesCb}
+          value={initialSelections.city}
+          disabled={
+            !initialSelections.state && !initialSelections.country
+          }
+          emptyMessage="No cities found"
+          onChange={(item) => {
+            pushWithParams((p) => {
+              if (item) p.set("city", item.id);
+              else p.delete("city");
+              p.delete("temple");
+            });
+          }}
+        />
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="temple-filter" className="text-sm font-medium">
-            Temple
-          </Label>
-          <select
-            id="temple-filter"
-            value={currentTemple}
-            onChange={(e) => handleFilterChange("temple", e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="">All Temples</option>
-            {temples.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <AsyncSearchCombobox
+          id="offerings-temple"
+          label="Temple"
+          placeholder={
+            initialSelections.state || initialSelections.city
+              ? "Search temple…"
+              : "Select state or city first"
+          }
+          search={searchTemplesCb}
+          value={initialSelections.temple}
+          disabled={
+            !initialSelections.state &&
+            !initialSelections.city &&
+            !initialSelections.temple
+          }
+          emptyMessage="No temples found"
+          onChange={(item) => {
+            pushWithParams((p) => {
+              if (item) p.set("temple", item.id);
+              else p.delete("temple");
+            });
+          }}
+        />
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="language-filter" className="text-sm font-medium">
@@ -134,24 +200,69 @@ export function OfferingsFilter({
           <select
             id="language-filter"
             value={currentLanguage}
-            onChange={(e) => handleFilterChange("language", e.target.value)}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            onChange={(e) => {
+              const v = e.target.value;
+              pushWithParams((p) => {
+                if (v) p.set("language", v);
+                else p.delete("language");
+              });
+            }}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <option value="">All Languages</option>
             <option value="English">English</option>
             <option value="Hindi">Hindi</option>
           </select>
         </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="date-from" className="text-sm font-medium">
+            Date from
+          </Label>
+          <Input
+            id="date-from"
+            type="date"
+            value={dateFrom}
+            onChange={(e) => {
+              const v = e.target.value;
+              pushWithParams((p) => {
+                if (v) p.set("dateFrom", v);
+                else p.delete("dateFrom");
+              });
+            }}
+            className="h-10"
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="date-to" className="text-sm font-medium">
+            Date to
+          </Label>
+          <Input
+            id="date-to"
+            type="date"
+            value={dateTo}
+            onChange={(e) => {
+              const v = e.target.value;
+              pushWithParams((p) => {
+                if (v) p.set("dateTo", v);
+                else p.delete("dateTo");
+              });
+            }}
+            className="h-10"
+          />
+        </div>
       </div>
 
-      {(currentCountry ||
-        currentState ||
-        currentCity ||
-        currentTemple ||
-        currentLanguage) && (
+      {hasActiveFilters && (
         <div className="mt-4 flex justify-end">
-          <Button variant="outline" onClick={handleClear} className="text-sm">
-            Clear Filters
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push(basePath)}
+            className="text-sm"
+          >
+            Clear filters
           </Button>
         </div>
       )}
