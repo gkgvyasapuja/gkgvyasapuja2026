@@ -24,11 +24,14 @@ export function PersonalInfoSection({
   handleSelectChange,
 }: Props) {
   return (
-    <section>
-      <h3 className="text-2xl font-semibold text-black mb-8 border-b border-white/10 pb-4">
+    <section className="bg-white/95 border border-[#dce6f6] rounded-2xl p-5 md:p-6 shadow-sm">
+      <h3 className="text-2xl font-semibold text-[#0a2540] mb-4">
         Personal Information / व्यक्तिगत जानकारी
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
+      <p className="text-sm text-[#5a718f] mb-6">
+        Add your basic details to identify your offering request.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
         <FormField
           label="First Name"
           subLabel="पहला नाम"

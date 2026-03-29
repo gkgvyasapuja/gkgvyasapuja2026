@@ -52,12 +52,16 @@ export function DocumentSection({
   };
 
   return (
-    <section className="pt-4">
-      <h3 className="text-2xl font-semibold text-white mb-8 border-b border-white/10 pb-4">
+    <section className="bg-white/95 border border-[#dce6f6] rounded-2xl p-5 md:p-6 shadow-sm">
+      <h3 className="text-2xl font-semibold text-[#0a2540] mb-2">
         Offering Document / भेंट दस्तावेज़
       </h3>
+      <p className="text-sm text-[#5a718f] mb-6">
+        Upload your document and review extracted text for corrections before
+        submit.
+      </p>
 
-      <div className="space-y-6">
+      <div className="space-y-5">
         <label
           className={`flex flex-col items-center justify-center w-full min-h-60 border-2 border-dashed rounded-3xl cursor-pointer transition-all duration-300 group
             ${

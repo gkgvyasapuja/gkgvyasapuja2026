@@ -48,10 +48,19 @@ export default function UploadOfferingForm() {
 
   return (
     <>
-      <div className="w-full max-w-6xl mx-auto text-black rounded-3xl shadow-2xl overflow-hidden font-sans border border-black/10 relative">
-        <div className="p-8 md:p-14">
+      <div className="w-full max-w-6xl mx-auto text-[#0b1a33] rounded-3xl shadow-sm overflow-hidden font-sans border border-black/10 bg-gradient-to-br from-white via-[#f8fbff] to-[#e7eeff] relative">
+        <div className="p-6 md:p-10 lg:p-14">
+          <div className="mb-8 p-6 rounded-2xl bg-white/90 shadow-sm border border-[#dce6f6]">
+            <h2 className="text-3xl font-bold text-[#0a2540] mb-2">
+              Upload Offering Form
+            </h2>
+            <p className="text-sm text-[#526c96]">
+              Complete your details, upload the document, and submit your
+              offering for review.
+            </p>
+          </div>
           {/* Stepper UI */}
-          <div className="flex items-center justify-between mb-12 relative px-4 md:px-10">
+          <div className="flex items-center justify-between mb-10 relative px-4 md:px-10">
             <div className="absolute left-10 right-10 top-5 h-0.5 bg-white/10 -z-10" />
             <div
               className="absolute left-10 top-5 h-0.5 bg-blue-500 transition-all duration-500 -z-10"
@@ -157,7 +166,7 @@ export default function UploadOfferingForm() {
         </div>
 
         {/* Form Action Footer */}
-        <div className="bg-black/20 backdrop-blur-sm p-8 md:px-14 border-t border-white/10 flex justify-between sticky bottom-0 z-10 transition-all items-center">
+        <div className="bg-white/90 backdrop-blur-sm p-5 md:p-7 border-t border-[#dce6f6] flex justify-between sticky bottom-0 z-10 transition-all items-center shadow-[0_-8px_30px_rgba(12,35,69,0.09)]">
           {step > 1 ? (
             <Button
               onClick={() => {
@@ -199,7 +208,7 @@ export default function UploadOfferingForm() {
               (step === 2 && (!file || !extractedText))
             }
             size="lg"
-            className={`px-10 py-7 text-xl rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed font-medium w-full sm:w-auto shadow-xl shadow-black/20 transition-all hover:-translate-y-0.5 ${
+            className={`px-10 py-7 text-xl rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed font-medium w-full sm:w-auto shadow-sm shadow-black/20 transition-all hover:-translate-y-0.5 ${
               step === 3
                 ? "bg-blue-500 text-white hover:bg-blue-600"
                 : "bg-white text-[#0a2540] hover:bg-gray-100"

@@ -24,19 +24,26 @@ export function InitiationSection({
   handleSelectChange,
 }: Props) {
   return (
-    <section className="bg-white/5 -mx-8 md:-mx-14 px-8 md:px-14 py-10 border-y border-white/10">
-      <div className="flex items-center gap-4 mb-8">
+    <section className="bg-white/95 border border-[#dce6f6] rounded-2xl p-5 md:p-6 shadow-sm">
+      <h3 className="text-2xl font-semibold text-[#0a2540] mb-2">
+        Initiation Details / दीक्षा विवरण
+      </h3>
+      <p className="text-sm text-[#5a718f] mb-4">
+        Choose whether you are initiated. Additional fields appear when
+        selected.
+      </p>
+      <div className="flex items-start gap-3 mb-5">
         <input
           type="checkbox"
           name="initiated"
           id="initiated-checkbox"
           checked={formData.initiated}
           onChange={handleInputChange}
-          className="w-4 h-4 rounded border-white/20 bg-white/5 text-[#0a2540] focus:ring-white/20 cursor-pointer transition-colors"
+          className="w-5 h-5 rounded border-[#dce6f6] bg-white text-[#0a2540] focus:ring-[#0a2540]/30 cursor-pointer transition-colors"
         />
         <label
           htmlFor="initiated-checkbox"
-          className="text-2xl font-semibold text-black cursor-pointer select-none"
+          className="text-lg font-semibold text-[#0a2540] cursor-pointer select-none"
         >
           Are you initiated? / क्या आप दीक्षित हैं?
         </label>
