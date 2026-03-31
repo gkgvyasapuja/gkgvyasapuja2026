@@ -28,18 +28,25 @@ export function LocationSection({
 }: Props) {
   return (
     <section>
-      <h3 className="text-2xl font-semibold text-white mb-8 border-b border-white/10 pb-4">
-        Location Details / स्थान का विवरण
-      </h3>
+      <div className="flex items-center gap-2 mb-6">
+        <span className="text-amber-500">•</span>
+        <h3 className="text-xs font-extrabold tracking-[0.22em] text-slate-500 uppercase">
+          Location Details
+        </h3>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
-        <FormField label="Country" subLabel="देश" required>
+        <FormField
+          label="Country"
+          subLabel="देश"
+          required
+        >
           <Select
             value={formData.countryId}
             onValueChange={(val) =>
               handleSelectChange("countryId", val as string)
             }
           >
-            <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors">
+            <SelectTrigger className="h-11 w-full px-5 bg-slate-50 border border-slate-200 text-slate-700 focus:ring-2 focus:ring-amber-400/20 rounded-xl text-[15px] transition-all">
               <SelectValue placeholder="Select Country">
                 {countries.find((c) => c.id === formData.countryId)?.name ||
                   "Select Country"}
@@ -50,7 +57,7 @@ export function LocationSection({
                 <SelectItem
                   key={c.id}
                   value={c.id}
-                  className="text-lg py-3 hover:bg-gray-50 cursor-pointer"
+                  className="text-sm py-3 hover:bg-gray-50 cursor-pointer"
                 >
                   {c.name}
                 </SelectItem>
@@ -59,7 +66,11 @@ export function LocationSection({
           </Select>
         </FormField>
 
-        <FormField label="State / Province" subLabel="राज्य / प्रान्त" required>
+        <FormField
+          label="State / Province"
+          subLabel="राज्य / प्रान्त"
+          required
+        >
           <Select
             value={formData.stateId}
             onValueChange={(val) =>
@@ -67,7 +78,7 @@ export function LocationSection({
             }
             disabled={!formData.countryId}
           >
-            <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors disabled:opacity-50 disabled:bg-gray-100">
+            <SelectTrigger className="h-11 w-full px-5 bg-slate-50 border border-slate-200 text-slate-700 focus:ring-2 focus:ring-amber-400/20 rounded-xl text-[15px] transition-all">
               <SelectValue placeholder="Select State">
                 {states.find((s) => s.id === formData.stateId)?.name ||
                   "Select State"}
@@ -78,7 +89,7 @@ export function LocationSection({
                 <SelectItem
                   key={s.id}
                   value={s.id}
-                  className="text-lg py-3 hover:bg-gray-50 cursor-pointer"
+                  className="text-sm py-3 hover:bg-gray-50 cursor-pointer"
                 >
                   {s.name}
                 </SelectItem>
@@ -87,13 +98,17 @@ export function LocationSection({
           </Select>
         </FormField>
 
-        <FormField label="City" subLabel="शहर" required>
+        <FormField
+          label="City"
+          subLabel="शहर"
+          required
+        >
           <Select
             value={formData.cityId}
             onValueChange={(val) => handleSelectChange("cityId", val as string)}
             disabled={!formData.stateId}
           >
-            <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors disabled:opacity-50 disabled:bg-gray-100">
+            <SelectTrigger className="h-11 w-full px-5 bg-slate-50 border border-slate-200 text-slate-700 focus:ring-2 focus:ring-amber-400/20 rounded-xl text-[15px] transition-all">
               <SelectValue placeholder="Select City">
                 {cities.find((c) => c.id === formData.cityId)?.name ||
                   "Select City"}
@@ -104,7 +119,7 @@ export function LocationSection({
                 <SelectItem
                   key={c.id}
                   value={c.id}
-                  className="text-lg py-3 hover:bg-gray-50 cursor-pointer"
+                  className="text-sm py-3 hover:bg-gray-50 cursor-pointer"
                 >
                   {c.name}
                 </SelectItem>
@@ -113,7 +128,11 @@ export function LocationSection({
           </Select>
         </FormField>
 
-        <FormField label="Temple / Center" subLabel="मंदिर / केंद्र" required>
+        <FormField
+          label="Temple / Center"
+          subLabel="मंदिर / केंद्र"
+          required
+        >
           <Select
             value={formData.templeId}
             onValueChange={(val) =>
@@ -121,7 +140,7 @@ export function LocationSection({
             }
             disabled={!formData.stateId}
           >
-            <SelectTrigger className="h-16 py-6 px-4 bg-gray-50 border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors disabled:opacity-50 disabled:bg-gray-100">
+            <SelectTrigger className="h-11 w-full px-5 bg-slate-50 border border-slate-200 text-slate-700 focus:ring-2 focus:ring-amber-400/20 rounded-xl text-[15px] transition-all">
               <SelectValue placeholder="Select Temple">
                 {temples.find((t) => t.id === formData.templeId)?.name ||
                   "Select Temple"}
@@ -132,7 +151,7 @@ export function LocationSection({
                 <SelectItem
                   key={t.id}
                   value={t.id}
-                  className="text-lg py-3 hover:bg-gray-50 cursor-pointer"
+                  className="text-sm py-3 hover:bg-gray-50 cursor-pointer"
                 >
                   {t.name}
                 </SelectItem>

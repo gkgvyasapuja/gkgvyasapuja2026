@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { UploadCloud, Loader2, FileText, X } from "lucide-react";
+import { UploadCloud, Loader2, FileText, Paperclip } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -14,7 +14,7 @@ import { useAiChanges } from "../_hooks/useAiChanges";
 const QuillEditor = dynamic(() => import("./QuillWrapper"), {
   ssr: false,
   loading: () => (
-    <div className="min-h-[320px] w-full bg-gray-100 animate-pulse rounded-xl" />
+    <div className="min-h-[320px] w-full bg-slate-100 animate-pulse rounded-xl" />
   ),
 });
 
@@ -26,7 +26,14 @@ interface Props {
   setExtractedText: (text: string) => void;
   formData: OfferingFormData;
   handleSelectChange: (name: string, value: string) => void;
+  onSuggestionStateChange?: (
+    requiresAction: boolean,
+    actionCompleted: boolean,
+  ) => void;
 }
+
+const navy = "text-[#0f2744]";
+const navyBg = "bg-[#0f2744]";
 
 export function DocumentSection({
   file,
@@ -36,8 +43,12 @@ export function DocumentSection({
   setExtractedText,
   formData,
   handleSelectChange,
+  onSuggestionStateChange,
 }: Props) {
   const changes = useAiChanges(extractedText);
+  const [decision, setDecision] = useState<"unset" | "keep" | "accept">(
+    "unset",
+  );
 
   const handleReject = (id: string, originalText: string) => {
     if (typeof window === "undefined") return;
@@ -47,42 +58,111 @@ export function DocumentSection({
     if (node) {
       const textNode = doc.createTextNode(originalText);
       node.parentNode?.replaceChild(textNode, node);
+      const remaining = doc.querySelectorAll(".ai-correction").length;
       setExtractedText(doc.body.innerHTML);
+      setDecision(remaining === 0 ? "accept" : "unset");
+      onSuggestionStateChange?.(remaining > 0, remaining === 0);
     }
   };
 
+  const handleAccept = (id: string) => {
+    if (typeof window === "undefined") return;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(extractedText, "text/html");
+    const node = doc.querySelector(`.ai-correction[data-id="${id}"]`);
+    if (node) {
+      const textNode = doc.createTextNode(node.textContent || "");
+      node.parentNode?.replaceChild(textNode, node);
+      const remaining = doc.querySelectorAll(".ai-correction").length;
+      setExtractedText(doc.body.innerHTML);
+      setDecision(remaining === 0 ? "accept" : "unset");
+      onSuggestionStateChange?.(remaining > 0, remaining === 0);
+    }
+  };
+
+  const applyCorrectionDecision = (action: "keep" | "accept") => {
+    if (typeof window === "undefined") return;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(extractedText, "text/html");
+    const nodes = doc.querySelectorAll(".ai-correction");
+
+    nodes.forEach((node) => {
+      const replacementText =
+        action === "keep"
+          ? node.getAttribute("data-original") || node.textContent || ""
+          : node.textContent || "";
+      const textNode = doc.createTextNode(replacementText);
+      node.parentNode?.replaceChild(textNode, node);
+    });
+
+    setExtractedText(doc.body.innerHTML);
+    setDecision(action);
+    onSuggestionStateChange?.(false, true);
+  };
+
+  React.useEffect(() => {
+    if (changes.length === 0) {
+      setDecision("unset");
+      onSuggestionStateChange?.(false, true);
+      return;
+    }
+
+    if (decision === "unset") {
+      onSuggestionStateChange?.(true, false);
+    }
+  }, [changes.length, decision, onSuggestionStateChange]);
+
   return (
-    <section className="pt-4">
-      <h3 className="text-2xl font-semibold text-white mb-8 border-b border-white/10 pb-4">
-        Offering Document / भेंट दस्तावेज़
-      </h3>
+    <section className="pt-2">
+      <div className="text-center mb-8 md:mb-10">
+        <h2
+          className={`text-2xl md:text-3xl font-bold ${navy} font-serif mb-4 tracking-tight`}
+        >
+          Step 2 of 3: Upload your offering
+        </h2>
+        <p className="text-slate-600 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
+          Your offering is a heartfelt expression of gratitude. It serves as a
+          bridge between your service and the divine grace of Srila Prabhupada.
+        </p>
+      </div>
 
       <div className="space-y-6">
         <label
-          className={`flex flex-col items-center justify-center w-full min-h-60 border-2 border-dashed rounded-3xl cursor-pointer transition-all duration-300 group
-            ${
-              file
-                ? "border-white/30 bg-white/10"
-                : "border-white/20 bg-white/5 hover:bg-white/10"
-            }`}
+          htmlFor="offering-doc-upload"
+          className={`flex flex-col items-stretch w-full rounded-2xl border-2 border-dashed border-slate-300 bg-white cursor-pointer transition-colors hover:border-slate-400 hover:bg-slate-50/80 ${
+            file ? "border-slate-400 bg-slate-50/50" : ""
+          }`}
         >
           <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
-            <UploadCloud
-              className={`w-16 h-16 mb-6 transition-colors ${
-                file ? "text-white" : "text-gray-400 group-hover:text-white"
-              }`}
-            />
-            <p className="mb-2 text-xl text-white">
-              <span className="font-semibold">
-                {file ? "Replace document" : "Click to upload"}
-              </span>{" "}
-              or drag and drop
+            <div className="size-16 rounded-full bg-sky-100 flex items-center justify-center mb-6 shadow-sm">
+              <UploadCloud
+                className={`size-8 ${navy}`}
+                aria-hidden
+              />
+            </div>
+            <h3
+              className={`text-lg md:text-xl font-bold ${navy} font-serif mb-2`}
+            >
+              Upload Your Offering Letter
+            </h3>
+            <p className="text-slate-500 text-sm mb-6 max-w-md">
+              Drag and drop your document here or click to browse
             </p>
-            <p className="text-sm text-gray-400 max-w-sm">
-              Only Microsoft Word (.docx) files are supported up to 10MB.
+            <span
+              className={`inline-flex items-center gap-2 rounded-lg ${navyBg} px-5 py-2.5 text-sm font-medium text-white shadow-md pointer-events-none`}
+            >
+              <Paperclip
+                className="size-4 shrink-0"
+                aria-hidden
+              />
+              Select .docx File
+            </span>
+            <p className="mt-8 text-[10px] font-semibold tracking-[0.2em] text-slate-400 uppercase">
+              Max file size: 10MB
             </p>
           </div>
           <input
+            id="offering-doc-upload"
             type="file"
             className="hidden"
             accept=".docx"
@@ -91,24 +171,26 @@ export function DocumentSection({
         </label>
 
         {isParsing && (
-          <div className="flex items-center justify-center p-6 text-gray-300 gap-3 border border-white/10 rounded-2xl bg-white/5 animate-pulse">
-            <Loader2 className="w-5 h-5 animate-spin" /> Extracting text from
-            document...
+          <div className="flex items-center justify-center p-6 text-slate-700 gap-3 border border-slate-200 rounded-2xl bg-slate-50">
+            <Loader2 className="w-5 h-5 animate-spin text-[#0f2744]" />
+            <span>Extracting text from document…</span>
           </div>
         )}
 
         {file && !isParsing && extractedText && (
-          <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500 pt-4">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-5 bg-white/10 border border-white/20 rounded-2xl">
-              <div className="flex items-center gap-4">
-                <div className="bg-white/10 p-3 rounded-xl shadow-sm">
-                  <FileText className="w-6 h-6 text-white" />
+          <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500 pt-2">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between p-5 bg-white border border-slate-200 rounded-2xl shadow-sm">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="bg-sky-100 p-3 rounded-xl shrink-0">
+                  <FileText className={`w-6 h-6 ${navy}`} />
                 </div>
-                <div>
-                  <p className="text-white font-semibold truncate max-w-50 sm:max-w-xs">
+                <div className="min-w-0">
+                  <p
+                    className={`font-semibold truncate ${navy} max-w-[min(100%,20rem)]`}
+                  >
                     {file.name}
                   </p>
-                  <p className="text-gray-300 text-sm">
+                  <p className="text-slate-500 text-sm">
                     {(file.size / 1024).toFixed(1)} KB
                   </p>
                 </div>
@@ -120,7 +202,7 @@ export function DocumentSection({
                     handleSelectChange("language", val || "")
                   }
                 >
-                  <SelectTrigger className="h-10 px-4 bg-white/10 border-white/20 text-white focus:ring-white/20 rounded-lg shrink-0 w-35 font-medium">
+                  <SelectTrigger className="h-10 px-4 bg-slate-50 border-slate-200 text-slate-900 focus:ring-[#0f2744]/20 rounded-lg shrink-0 w-full sm:w-36 font-medium">
                     <SelectValue placeholder="Language" />
                   </SelectTrigger>
                   <SelectContent>
@@ -132,66 +214,125 @@ export function DocumentSection({
             </div>
 
             <div className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <label className="text-base font-medium text-white flex flex-col gap-0.5">
+              <div className="flex items-center justify-between px-1 gap-4 flex-wrap">
+                <label
+                  className={`text-base font-semibold ${navy} flex flex-col gap-0.5`}
+                >
                   <span>Document Preview</span>
-                  <span className="text-sm text-gray-400 font-normal">
+                  <span className="text-sm text-slate-500 font-normal">
                     दस्तावेज़ पूर्वावलोकन
                   </span>
                 </label>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-sm text-gray-400">
-                    You may edit this text before submitting
-                  </span>
-                </div>
+                <span className="text-sm text-slate-500">
+                  You may edit this text before submitting
+                </span>
               </div>
-              <div className="upload-offering-quill w-full rounded-2xl border border-gray-200 bg-white shadow-sm focus-within:border-[#0a2540]/30 focus-within:ring-2 focus-within:ring-[#0a2540]/20 overflow-hidden">
-                <QuillEditor
-                  value={extractedText}
-                  onChange={setExtractedText}
-                />
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
+                <div>
+                  <div className="upload-offering-quill w-full rounded-2xl border border-slate-200 bg-white shadow-sm focus-within:border-[#0f2744]/30 focus-within:ring-2 focus-within:ring-[#0f2744]/15 overflow-hidden">
+                    <QuillEditor
+                      value={extractedText}
+                      onChange={setExtractedText}
+                    />
+                  </div>
 
-              {changes.length > 0 && (
-                <div className="mt-8 pt-6 border-t border-white/10">
-                  <h4 className="text-lg text-white font-semibold mb-4 flex items-center gap-2">
-                    Pending Changes{" "}
-                    <span className="bg-yellow-500 text-[#0a2540] text-xs px-2.5 py-0.5 rounded-full font-bold">
-                      {changes.length}
-                    </span>
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {changes.map((change) => (
-                      <div
-                        key={change.id}
-                        className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col gap-3 animate-in fade-in zoom-in-95 hover:bg-white/10 transition-colors"
+                  {changes.length > 0 && (
+                    <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+                      {/* <button
+                        type="button"
+                        onClick={() => setMode("preview")}
+                        className={`px-3 py-1.5 rounded-full border text-xs font-semibold ${mode === "preview" ? "bg-[#0f2744] text-white border-transparent" : "bg-white text-slate-600 border-slate-300"}`}
                       >
-                        <div className="flex-1 space-y-1">
-                          <p className="text-sm text-gray-400 line-through decoration-red-500/50">
+                        Preview Mode
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMode("next")}
+                        className={`px-3 py-1.5 rounded-full border text-xs font-semibold ${mode === "next" ? "bg-[#0f2744] text-white border-transparent" : "bg-white text-slate-600 border-slate-300"}`}
+                      >
+                        Next Step
+                      </button> */}
+                      <button
+                        type="button"
+                        onClick={() => applyCorrectionDecision("keep")}
+                        className={`px-4 py-2 rounded-full font-semibold border shadow-sm text-sm transition-colors ${decision === "keep" ? "bg-sky-600 text-white border-sky-600" : "bg-sky-100 text-sky-800 border-sky-200 hover:bg-sky-200"}`}
+                      >
+                        Keep My Original
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => applyCorrectionDecision("accept")}
+                        className={`px-4 py-2 rounded-full font-semibold border shadow-sm text-sm transition-colors ${decision === "accept" ? "bg-amber-500 text-white border-amber-500" : "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200"}`}
+                      >
+                        Accept All Suggestions
+                      </button>
+                      <span className="ml-auto text-xs text-slate-500">
+                        {decision === "unset"
+                          ? "Choose an action to enable submit."
+                          : decision === "keep"
+                            ? "Keep original text selected. Submit enabled."
+                            : "Suggestions accepted. Submit enabled."}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {changes.length > 0 && (
+                  <aside className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm lg:sticky lg:top-6">
+                    <div className="flex items-center justify-between gap-2">
+                      <div>
+                        <h4 className={`text-lg font-semibold ${navy}`}>
+                          Suggested Improvements
+                        </h4>
+                        <p className="text-xs text-slate-500 uppercase tracking-widest">
+                          Optional
+                        </p>
+                      </div>
+                      <span className="text-xs text-slate-600 font-semibold">
+                        {changes.length} items
+                      </span>
+                    </div>
+
+                    <div className="mt-4 max-h-[60vh] overflow-y-auto pr-1 space-y-3">
+                      {changes.map((change) => (
+                        <div
+                          key={change.id}
+                          className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm"
+                        >
+                          <p className="text-xs text-slate-400 line-through decoration-red-300">
                             {change.original}
                           </p>
-                          <p className="text-lg text-white font-medium">
+                          <p className={`mt-1 text-sm ${navy} font-medium`}>
                             {change.updated}
                           </p>
-                          <p className="text-xs text-blue-300 mt-2 font-medium">
+                          <p className="mt-1 text-[10px] text-sky-700 font-semibold">
                             {change.reason}
                           </p>
+
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleAccept(change.id)}
+                              className="text-xs px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleReject(change.id, change.original)
+                              }
+                              className="text-xs px-3 py-1.5 rounded-xl bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-colors"
+                            >
+                              Ignore
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex justify-end mt-2">
-                          <button
-                            onClick={() =>
-                              handleReject(change.id, change.original)
-                            }
-                            className="text-xs flex items-center gap-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 px-4 py-2 rounded-xl transition-colors border border-red-500/20 font-semibold"
-                          >
-                            <X className="w-4 h-4" /> Reject Change
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      ))}
+                    </div>
+                  </aside>
+                )}
+              </div>
             </div>
           </div>
         )}

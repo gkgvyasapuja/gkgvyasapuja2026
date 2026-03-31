@@ -17,12 +17,12 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className={className}>
-      <label className="text-base font-medium text-white flex flex-col gap-0.5">
+      <label className="text-sm font-semibold text-slate-800 flex flex-col gap-0.5">
         <span>
           {label} {required && <span className="text-red-500">*</span>}
         </span>
         {subLabel && (
-          <span className="text-sm text-gray-400 font-normal">{subLabel}</span>
+          <span className="text-xs text-slate-500 font-normal">{subLabel}</span>
         )}
       </label>
       {children}

@@ -3,7 +3,7 @@
 import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 import {
   checkUserByEmail,
@@ -83,6 +83,11 @@ export default function UploadOfferingForm() {
   const { file, extractedText, setExtractedText, isParsing, handleFileChange } =
     useDocumentHandling(setError);
 
+  const [suggestionRequiresAction, setSuggestionRequiresAction] =
+    useState(false);
+  const [suggestionActionCompleted, setSuggestionActionCompleted] =
+    useState(false);
+
   const {
     isSubmitting,
     success,
@@ -153,187 +158,213 @@ export default function UploadOfferingForm() {
         onUseSaved={handleUseSavedProfile}
         onSkipAndReenter={handleSkipAndReenter}
       />
-      <div className="w-full max-w-4xl mx-auto bg-[#0a2540] rounded-3xl shadow-2xl overflow-hidden font-sans border border-white/10 relative">
-        <div className="p-8 md:p-14">
-          {/* Stepper UI */}
-          <div className="flex items-center justify-between mb-12 relative px-4 md:px-10">
-            <div className="absolute left-10 right-10 top-5 h-0.5 bg-white/10 -z-10" />
-            <div
-              className="absolute left-10 top-5 h-0.5 bg-blue-500 transition-all duration-500 -z-10"
-              style={{ width: `calc(${((step - 1) / 2) * 100}% - 40px)` }}
-            />
+      <div className="w-full flex flex-col items-center gap-6">
+        {/* Stepper */}
+        <div className="w-full max-w-md mx-auto">
+          <div className="relative flex items-start justify-between px-6">
+            <div className="absolute left-10 right-10 top-4 h-px bg-slate-200" />
             {[
-              { num: 1, label: "Basic Details" },
-              { num: 2, label: "Upload Document" },
-              { num: 3, label: "Review & Submit" },
-            ].map((s) => (
-              <div
-                key={s.num}
-                className="flex flex-col items-center"
-              >
+              { num: 1, label: "IDENTITY" },
+              { num: 2, label: "JOURNEY" },
+              { num: 3, label: "CONFIRM" },
+            ].map((s) => {
+              const isActive = step === s.num;
+              const isDone = step > s.num;
+              return (
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shadow-xl transition-colors duration-300 ${
-                    step === s.num
-                      ? "bg-blue-500 text-white ring-4 ring-blue-500/20"
-                      : step > s.num
-                        ? "bg-green-500 text-white"
-                        : "bg-[#0a2540] text-gray-400 border-2 border-white/20"
-                  }`}
+                  key={s.num}
+                  className="relative flex flex-col items-center"
                 >
-                  {step > s.num ? "✓" : s.num}
-                </div>
-                <span
-                  className={`text-xs mt-3 font-medium transition-colors duration-300 ${
-                    step === s.num
-                      ? "text-blue-400"
-                      : step > s.num
-                        ? "text-green-400"
-                        : "text-gray-500"
-                  }`}
-                >
-                  {s.label}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {error && (
-            <div className="mb-10 p-5 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-medium flex items-start gap-3">
-              <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
-                !
-              </div>
-              <p>{error}</p>
-            </div>
-          )}
-
-          <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {step === 1 && (
-              <>
-                <PersonalInfoSection
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                  handleSelectChange={handleSelectChange}
-                  onEmailChange={handleEmailChange}
-                  onEmailBlur={handleEmailBlur}
-                  isCheckingEmail={checkingEmail}
-                />
-                <InitiationSection
-                  formData={formData}
-                  handleInputChange={handleInputChange}
-                  handleSelectChange={handleSelectChange}
-                />
-                <LocationSection
-                  formData={formData}
-                  handleSelectChange={handleSelectChange}
-                  countries={countries}
-                  states={states}
-                  cities={cities}
-                  temples={temples}
-                />
-              </>
-            )}
-            {(step === 2 || step === 3) && (
-              <>
-                <DocumentSection
-                  file={file}
-                  handleFileChange={(e) => {
-                    handleFileChange(e);
-                    setIsReviewing(false);
-                  }}
-                  isParsing={isParsing}
-                  extractedText={extractedText}
-                  setExtractedText={(text) => {
-                    setExtractedText(text);
-                    setIsReviewing(false);
-                  }}
-                  formData={formData}
-                  handleSelectChange={handleSelectChange}
-                />
-                {step === 3 && isReviewing && (
-                  <div className="p-5 bg-blue-500/10 border border-blue-400/30 rounded-2xl text-blue-100 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
-                    <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 mt-0.5 text-blue-300">
-                      i
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <p className="font-semibold text-blue-200">
-                        Review your offering
-                      </p>
-                      <p className="text-md text-blue-100/80">
-                        We have quickly checked your document&apos;s text to
-                        ensure proper spelling and formatting. Please review the
-                        text above to make sure it is correct. If you agree,
-                        click &ldquo;Confirm & Submit&rdquo; below.
-                      </p>
-                    </div>
+                  <div
+                    className={[
+                      "size-8 rounded-full flex items-center justify-center text-xs font-extrabold border transition-colors",
+                      isActive
+                        ? "bg-amber-400 border-amber-400 text-slate-900"
+                        : isDone
+                          ? "bg-slate-200 border-slate-200 text-slate-700"
+                          : "bg-slate-100 border-slate-200 text-slate-500",
+                    ].join(" ")}
+                  >
+                    {s.num}
                   </div>
-                )}
-              </>
-            )}
+                  <div
+                    className={[
+                      "mt-2 text-[10px] font-extrabold tracking-[0.18em]",
+                      isActive ? "text-slate-800" : "text-slate-400",
+                    ].join(" ")}
+                  >
+                    {s.label}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Form Action Footer */}
-        <div className="bg-black/20 backdrop-blur-sm p-8 md:px-14 border-t border-white/10 flex justify-between sticky bottom-0 z-10 transition-all items-center">
-          {step > 1 ? (
+        <div className="w-full max-w-6xl mx-auto  overflow-hidden font-sans ">
+          <div className="p-8 md:p-10">
+            {error && (
+              <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 text-sm font-medium flex items-start gap-3">
+                <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5 text-red-700">
+                  !
+                </div>
+                <p>{error}</p>
+              </div>
+            )}
+
+            <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              {step === 1 && (
+                <>
+                  <PersonalInfoSection
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                    handleSelectChange={handleSelectChange}
+                    onEmailChange={handleEmailChange}
+                    onEmailBlur={handleEmailBlur}
+                    isCheckingEmail={checkingEmail}
+                  />
+                  <InitiationSection
+                    formData={formData}
+                    handleInputChange={handleInputChange}
+                    handleSelectChange={handleSelectChange}
+                  />
+                  <LocationSection
+                    formData={formData}
+                    handleSelectChange={handleSelectChange}
+                    countries={countries}
+                    states={states}
+                    cities={cities}
+                    temples={temples}
+                  />
+                </>
+              )}
+              {(step === 2 || step === 3) && (
+                <>
+                  <DocumentSection
+                    file={file}
+                    handleFileChange={(e) => {
+                      handleFileChange(e);
+                      setIsReviewing(false);
+                    }}
+                    isParsing={isParsing}
+                    extractedText={extractedText}
+                    setExtractedText={(text) => {
+                      setExtractedText(text);
+                      setIsReviewing(false);
+                    }}
+                    formData={formData}
+                    handleSelectChange={handleSelectChange}
+                    onSuggestionStateChange={(
+                      requiresAction,
+                      actionCompleted,
+                    ) => {
+                      setSuggestionRequiresAction(requiresAction);
+                      setSuggestionActionCompleted(actionCompleted);
+                    }}
+                  />
+                  {step === 3 && isReviewing && (
+                    <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl text-slate-800 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
+                      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5 text-blue-700">
+                        i
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <p className="font-semibold text-slate-900">
+                          Review your offering
+                        </p>
+                        <p className="text-md text-slate-700">
+                          We have quickly checked your document&apos;s text to
+                          ensure proper spelling and formatting. Please review
+                          the text above to make sure it is correct. If you
+                          agree, click &ldquo;Confirm & Submit&rdquo; below.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Form Action Footer — stack on mobile when both actions show (step 2/3) */}
+          <div
+            className={
+              step > 1
+                ? "bg-white p-6 md:px-10 border-t border-slate-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 w-full min-w-0"
+                : "bg-white p-6 md:px-10 border-t border-slate-100 flex flex-row justify-end items-center gap-4 w-full min-w-0"
+            }
+          >
+            {step > 1 ? (
+              <Button
+                onClick={() => {
+                  if (step === 3) {
+                    setIsReviewing(false);
+                    setSuggestionRequiresAction(false);
+                    setSuggestionActionCompleted(false);
+                  }
+                  setStep((prev) => (prev - 1) as 1 | 2);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                variant="ghost"
+                disabled={isSubmitting || isFixingText}
+                className="text-slate-600 hover:bg-slate-100 px-2 py-2 text-sm rounded-full gap-1.5 self-start sm:self-auto shrink-0"
+              >
+                <ArrowLeft
+                  className="size-4 shrink-0"
+                  aria-hidden
+                />
+                Go Back
+              </Button>
+            ) : (
+              <div /> // Placeholder to keep the flex alignment when there's no Back button
+            )}
+
             <Button
               onClick={() => {
-                if (step === 3) setIsReviewing(false);
-                setStep((prev) => (prev - 1) as 1 | 2);
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                if (step === 1) {
+                  if (validateStep1()) {
+                    setStep(2);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                } else if (step === 2) {
+                  if (validateStep2()) {
+                    handleAutoCorrection(setExtractedText, () => {
+                      setStep(3);
+                    });
+                  }
+                } else if (step === 3) {
+                  submitFinal();
+                }
               }}
-              variant="ghost"
-              disabled={isSubmitting || isFixingText}
-              className="text-white hover:bg-white/10 px-6 py-7 text-lg rounded-2xl"
-            >
-              Back
-            </Button>
-          ) : (
-            <div /> // Placeholder to keep the flex alignment when there's no Back button
-          )}
-
-          <Button
-            onClick={() => {
-              if (step === 1) {
-                if (validateStep1()) {
-                  setStep(2);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }
-              } else if (step === 2) {
-                if (validateStep2()) {
-                  handleAutoCorrection(setExtractedText, () => {
-                    setStep(3);
-                  });
-                }
-              } else if (step === 3) {
-                submitFinal();
+              disabled={
+                isSubmitting ||
+                isParsing ||
+                isFixingText ||
+                (step === 2 && (!file || !extractedText)) ||
+                (step === 3 &&
+                  suggestionRequiresAction &&
+                  !suggestionActionCompleted)
               }
-            }}
-            disabled={
-              isSubmitting ||
-              isParsing ||
-              isFixingText ||
-              (step === 2 && (!file || !extractedText))
-            }
-            size="lg"
-            className={`px-10 py-7 text-xl rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed font-medium w-full sm:w-auto shadow-xl shadow-black/20 transition-all hover:-translate-y-0.5 ${
-              step === 3
-                ? "bg-blue-500 text-white hover:bg-blue-600"
-                : "bg-white text-[#0a2540] hover:bg-gray-100"
-            }`}
-          >
-            {isSubmitting || isFixingText ? (
-              <>
-                <Loader2 className="w-6 h-6 mr-3 animate-spin" />{" "}
-                {isFixingText ? "Reviewing text..." : "Submitting..."}
-              </>
-            ) : step === 1 ? (
-              "Next: Upload Document"
-            ) : step === 2 ? (
-              "Process Document"
-            ) : (
-              "Confirm & Submit"
-            )}
-          </Button>
+              size="lg"
+              className={`h-12 px-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed font-semibold w-full sm:w-auto min-w-0 shadow-sm transition-colors ${
+                step === 3
+                  ? "bg-slate-900 text-white hover:bg-slate-800"
+                  : "bg-amber-400 text-slate-900 hover:bg-amber-300"
+              }`}
+            >
+              {isSubmitting || isFixingText ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />{" "}
+                  {isFixingText ? "Reviewing text..." : "Submitting..."}
+                </>
+              ) : step === 1 ? (
+                "Continue to Step 2"
+              ) : step === 2 ? (
+                "Process Document"
+              ) : (
+                "Confirm & Submit"
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </>

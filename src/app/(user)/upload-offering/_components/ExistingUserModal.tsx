@@ -24,46 +24,46 @@ export function ExistingUserModal({
   onSkipAndReenter,
 }: Props) {
   return (
-    <Dialog
-      open={open}
-      onOpenChange={onOpenChange}
-      disablePointerDismissal
-    >
+    <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal>
       <DialogContent
         showCloseButton={false}
-        className="sm:max-w-md bg-[#0a2540] text-white border border-white/15 ring-white/10"
+        className="sm:max-w-md bg-white text-slate-700 border border-slate-200 shadow-xl rounded-2xl"
       >
-        <DialogHeader>
-          <DialogTitle className="text-lg text-white">
-            We already have your profile
+        {/* Header */}
+        <DialogHeader className="space-y-3 text-center">
+          <DialogTitle className="text-lg font-semibold text-slate-800">
+            Profile already found
           </DialogTitle>
-          <DialogDescription className="text-blue-100/90 text-sm">
-            This email is registered. You can load your saved details to save
-            time, or clear the form and enter everything again (your email will
-            stay). Your submission will update your existing record.
+
+          <DialogDescription className="text-sm text-slate-500 leading-relaxed">
+            We found your details with this email. You can continue with your
+            saved information or enter everything again.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-2 border-t-0 bg-transparent p-0 pt-2">
+
+        {/* Actions */}
+        <DialogFooter className="flex flex-col sm:flex-row gap-3 pt-4">
           <Button
             type="button"
             variant="outline"
-            className="w-full sm:w-auto border-white/25 text-white bg-white/5 hover:bg-white/10"
+            className="w-full sm:w-auto border-slate-200 text-slate-600 bg-white hover:bg-slate-50 rounded-xl text-sm font-medium"
             onClick={() => {
               onSkipAndReenter();
               onOpenChange(false);
             }}
           >
-            Skip and re-enter
+            Enter manually
           </Button>
+
           <Button
             type="button"
-            className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white"
+            className="w-full sm:w-auto bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-medium shadow-sm"
             onClick={() => {
               onUseSaved();
               onOpenChange(false);
             }}
           >
-            Fill with saved information
+            Use saved details
           </Button>
         </DialogFooter>
       </DialogContent>

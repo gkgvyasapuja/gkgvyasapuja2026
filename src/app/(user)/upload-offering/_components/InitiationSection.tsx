@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import React from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,35 +27,75 @@ export function InitiationSection({
   handleSelectChange,
 }: Props) {
   return (
-    <section className="bg-white/5 -mx-8 md:-mx-14 px-8 md:px-14 py-10 border-y border-white/10">
-      <div className="flex items-center gap-4 mb-8">
-        <input
-          type="checkbox"
-          name="initiated"
-          id="initiated-checkbox"
-          checked={formData.initiated}
-          onChange={handleInputChange}
-          className="w-4 h-4 rounded border-white/20 bg-white/5 text-[#0a2540] focus:ring-white/20 cursor-pointer transition-colors"
-        />
-        <label
-          htmlFor="initiated-checkbox"
-          className="text-2xl font-semibold text-white cursor-pointer select-none"
-        >
-          Are you initiated? / क्या आप दीक्षित हैं?
-        </label>
+    <section className="py-2">
+      <div className="flex items-center gap-2 mb-4">
+        <span className="text-amber-400">•</span>
+        <h3 className="text-xs font-semibold tracking-[0.18em] text-slate-400 uppercase">
+          Spiritual Status
+        </h3>
+      </div>
+
+      <div className="space-y-4">
+        <p className="text-sm font-bold mb-0 text-slate-800">
+          Are you initiated?
+        </p>
+        <p className="text-xs text-slate-500">क्या आप दीक्षित हैं?</p>
+
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              handleInputChange({
+                target: { name: "initiated", type: "checkbox", checked: true },
+              } as any)
+            }
+            className={`h-11 rounded-xl border text-[14px] font-medium transition-all ${
+              formData.initiated
+                ? "bg-white border-amber-400/60 text-slate-800 shadow-sm"
+                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            Yes
+          </button>
+
+          <button
+            type="button"
+            onClick={() =>
+              handleInputChange({
+                target: {
+                  name: "initiated",
+                  type: "checkbox",
+                  checked: false,
+                },
+              } as any)
+            }
+            className={`h-11 rounded-xl border text-[14px] font-medium transition-all ${
+              !formData.initiated
+                ? "bg-white border-amber-400/60 text-slate-800 shadow-sm"
+                : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            Not
+          </button>
+        </div>
       </div>
 
       {formData.initiated && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-8 animate-in slide-in-from-top-4 fade-in duration-500">
-          <FormField label="Initiated Name" subLabel="दीक्षित नाम" required>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 animate-in slide-in-from-top-4 fade-in duration-500">
+          <FormField
+            label="Initiated Name"
+            subLabel="दीक्षित नाम"
+            required
+          >
             <Input
               name="initiatedName"
               value={formData.initiatedName}
               onChange={handleInputChange}
-              placeholder="Das/Dasi"
-              className="h-12 bg-white border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors shadow-sm"
+              placeholder="Your initiated name"
+              className="h-11 px-5 bg-slate-50 border border-slate-200 text-slate-700 placeholder:text-slate-400 rounded-xl text-[15px] focus-visible:ring-amber-400/20"
             />
           </FormField>
+
           <FormField
             label="Initiation Type"
             subLabel="दीक्षा का प्रकार"
@@ -61,34 +104,27 @@ export function InitiationSection({
             <Select
               value={formData.initiationType}
               onValueChange={(val) =>
-                handleSelectChange("initiationType", val as string)
+                handleSelectChange("initiationType", val!)
               }
             >
-              <SelectTrigger className="h-12 py-6 px-4 bg-white border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors shadow-sm">
-                <SelectValue placeholder="Select Type" />
+              <SelectTrigger className="h-11 w-full px-5 bg-slate-50 border border-slate-200 text-slate-700 focus:ring-2 focus:ring-amber-400/20 rounded-xl text-[15px] transition-all">
+                <SelectValue placeholder="Select type" />
               </SelectTrigger>
+
               <SelectContent>
-                <SelectItem
-                  value="Harinam"
-                  className="text-lg p-3 hover:bg-gray-50 cursor-pointer"
-                >
-                  Harinam
-                </SelectItem>
-                <SelectItem
-                  value="Brahman"
-                  className="text-lg p-3 hover:bg-gray-50 cursor-pointer"
-                >
-                  Brahman
-                </SelectItem>
-                <SelectItem
-                  value="Sannyas"
-                  className="text-lg p-3 hover:bg-gray-50 cursor-pointer"
-                >
-                  Sannyas
-                </SelectItem>
+                {["Harinam", "Brahman", "Sannyas"].map((item) => (
+                  <SelectItem
+                    key={item}
+                    value={item}
+                    className="text-[14px] text-slate-600 p-2.5 hover:bg-slate-50"
+                  >
+                    {item}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </FormField>
+
           <FormField
             label="Year of Initiation"
             subLabel="दीक्षा का वर्ष"
@@ -98,8 +134,9 @@ export function InitiationSection({
               name="initiationYear"
               value={formData.initiationYear}
               onChange={handleInputChange}
-              placeholder="YYYY"
-              className="h-12 bg-white border-gray-200 text-gray-900 focus:ring-[#0a2540]/20 rounded-xl text-xl transition-colors shadow-sm"
+              placeholder="e.g. 2015"
+              type="number"
+              className="h-11 px-5 bg-slate-50 border border-slate-200 text-slate-700 placeholder:text-slate-400 rounded-xl text-[15px] focus-visible:ring-amber-400/20"
             />
           </FormField>
         </div>
