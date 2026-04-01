@@ -55,7 +55,7 @@ export default function UploadOfferingPage() {
             <UploadOfferingForm />
           </div>
 
-          <div className="text-center">
+          {/* <div className="text-center">
             <h2 className="text-2xl md:text-3xl font-semibold text-black mb-4 tracking-tight mt-20">
               Importance of Vyasa-puja for a Disciple
             </h2>
@@ -163,7 +163,7 @@ export default function UploadOfferingPage() {
                 </p>
               </section>
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
     </main>

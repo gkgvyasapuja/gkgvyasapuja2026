@@ -65,9 +65,123 @@ function emptyFormExceptEmail(email: string): OfferingFormData {
   };
 }
 
+// ─── Guidance content (Step 1) ───────────────────────────────────────────────
+function GuidanceStep() {
+  return (
+    <div className="space-y-10">
+      <div className="text-center">
+        <h2 className="text-2xl md:text-3xl font-semibold text-black mb-4 tracking-tight mt-4">
+          Importance of Vyasa-puja for a Disciple
+        </h2>
+        <p className="py-3 text-slate-700">
+          The appearance day of our dear Gurudeva, His Holiness Gopal Krishna
+          Goswami Maharaja falls on the most auspicious day of Annada Ekadashi.
+          It is a very special day not only for his disciples but for the entire
+          ISKCON society, because he has won everyone&apos;s hearts by his
+          compassionate nature.
+        </p>
+        <p className="py-3 text-slate-700">
+          We are eternally indebted to Guru Maharaja for showing us the path of
+          devotion and as a small gesture of love towards him, we attempt to
+          write the Vyasa Puja offering and glorify him. Every year, disciples
+          from all over the world mail these offerings in advance, then they are
+          compiled into a book called the Vyasa Puja book of the year.
+        </p>
+        <p className="py-3 text-slate-700">
+          On the auspicious day of Guru Maharaja&apos;s appearance, this book is
+          presented to Gurudeva, who opens the book and reads the offerings.
+          This is the moment which the disciples are anxiously waiting for,
+          hoping that Guru Maharaja reads their offering. So in short, our love
+          for our Guru is expressed through our Vyasa Puja offerings. Each of
+          the offerings written by disciples comes straight from their heart,
+          there is no doubt about it, but sharing some of the tips to make our
+          offerings exceptionally good.
+        </p>
+      </div>
+
+      <div className="w-full bg-white border border-slate-200 shadow-lg rounded-3xl p-8">
+        <div className="text-center mb-6">
+          <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-2 tracking-tight">
+            How to Write Vyasa Puja Offering
+          </h2>
+          <p className="text-sm md:text-base text-slate-600 max-w-3xl mx-auto">
+            Follow these steps for structuring a heartfelt and respectful
+            offering.
+          </p>
+        </div>
+
+        <div className="space-y-5 text-slate-700">
+          <section className="bg-sky-50 border-l-4 border-sky-400 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-sky-700">Addressing</h3>
+            <p className="mt-2">
+              Start with a respectful salutation to Guru Maharaja (e.g. Dear
+              Guru Maharaja), then ask for permission to offer humble obeisances
+              at the dust of his lotus feet.
+            </p>
+          </section>
+
+          <section className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-amber-700">
+              Main Offering
+            </h3>
+            <p>
+              Share your sincere experience, how wisdom from Guru Maharaja has
+              touched you, and relate it to guru-pranamantra or a relevant
+              shloka.
+            </p>
+            <blockquote className="mt-3 rounded-lg border border-amber-200 bg-white p-4 text-sm text-slate-800">
+              <p className="mb-1">
+                &ldquo;titiksavah karunikah, suhrdah sarva-dehinam&rdquo;
+              </p>
+              <p className="mb-0">
+                &ldquo;ajata-satravah santah, sadhavah sadhu-bhusanah&rdquo;
+              </p>
+            </blockquote>
+            <p className="mt-3 text-slate-600">
+              (SB CANTO 3 CHAP 25 TEXT 21) – The symptoms of a sadhu are
+              tolerance, mercy and friendliness. He is peaceful and follows
+              scripture.
+            </p>
+          </section>
+
+          <section className="bg-slate-100 border-l-4 border-slate-400 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-slate-900">
+              Personal Gratitude
+            </h3>
+            <ul className="list-disc pl-5 space-y-2 text-slate-700">
+              <li>
+                Mention what Guru Maharaja has done for your spiritual growth
+                and service.
+              </li>
+              <li>
+                Highlight your devotional activities (preaching, book
+                distribution, service).
+              </li>
+              <li>
+                Keep it humble; this is an offering, not personal promotion.
+              </li>
+            </ul>
+          </section>
+
+          <section className="bg-gradient-to-r from-indigo-50 via-white to-blue-50 border border-blue-200 p-5 rounded-xl">
+            <h3 className="text-lg font-semibold text-blue-900">Ending</h3>
+            <p className="mt-2 text-slate-700">
+              Close with prayer for Guru Maharaja&apos;s long life and health,
+              then sign with your name and temple affiliation.
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main form component ──────────────────────────────────────────────────────
 export default function UploadOfferingForm() {
   const router = useRouter();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  // Steps: 1=Guidance  2=Identity  3=Journey  4=Confirm
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [error, setError] = useState<string | null>(null);
   const [existingUserModalOpen, setExistingUserModalOpen] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
@@ -100,6 +214,7 @@ export default function UploadOfferingForm() {
     isReviewing,
   } = useSubmitOffering(formData, setFormData, file, extractedText, setError);
 
+  // ── Email helpers ────────────────────────────────────────────────────────
   const handleEmailChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -119,9 +234,7 @@ export default function UploadOfferingForm() {
     try {
       const result = await checkUserByEmail(email);
       if (!result.exists) {
-        if ("error" in result && result.error) {
-          setError(result.error);
-        }
+        if ("error" in result && result.error) setError(result.error);
         return;
       }
       savedProfileRef.current = result.user;
@@ -150,6 +263,74 @@ export default function UploadOfferingForm() {
     return <SuccessState onReturnHome={() => router.push("/")} />;
   }
 
+  // ── Stepper config ────────────────────────────────────────────────────────
+  const STEPS = [
+    { num: 1, label: "GUIDANCE" },
+    { num: 2, label: "IDENTITY" },
+    { num: 3, label: "JOURNEY" },
+    { num: 4, label: "CONFIRM" },
+  ] as const;
+
+  // ── Primary action handler ────────────────────────────────────────────────
+  const handleNext = () => {
+    if (step === 1) {
+      // Guidance → Identity: no validation required
+      setStep(2);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (step === 2) {
+      // Identity → Journey
+      if (validateStep1()) {
+        setStep(3);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else if (step === 3) {
+      // Journey → Confirm
+      if (validateStep2()) {
+        handleAutoCorrection(setExtractedText, () => {
+          setStep(4);
+        });
+      }
+    } else if (step === 4) {
+      // Confirm → Submit
+      submitFinal();
+    }
+  };
+
+  // ── Back handler ──────────────────────────────────────────────────────────
+  const handleBack = () => {
+    if (step === 4) {
+      setIsReviewing(false);
+      setSuggestionRequiresAction(false);
+      setSuggestionActionCompleted(false);
+    }
+    setStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // ── Button label ──────────────────────────────────────────────────────────
+  const nextLabel = () => {
+    if (isSubmitting || isFixingText) {
+      return (
+        <>
+          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          {isFixingText ? "Reviewing text..." : "Submitting..."}
+        </>
+      );
+    }
+    if (step === 1) return "Continue to Step 2";
+    if (step === 2) return "Continue to Step 3";
+    if (step === 3) return "Process Document";
+    return "Confirm & Submit";
+  };
+
+  // ── Next button disabled state ────────────────────────────────────────────
+  const isNextDisabled =
+    isSubmitting ||
+    isParsing ||
+    isFixingText ||
+    (step === 3 && (!file || !extractedText)) ||
+    (step === 4 && suggestionRequiresAction && !suggestionActionCompleted);
+
   return (
     <>
       <ExistingUserModal
@@ -158,16 +339,13 @@ export default function UploadOfferingForm() {
         onUseSaved={handleUseSavedProfile}
         onSkipAndReenter={handleSkipAndReenter}
       />
+
       <div className="w-full flex flex-col items-center gap-6">
-        {/* Stepper */}
+        {/* ── Stepper ── */}
         <div className="w-full max-w-md mx-auto">
           <div className="relative flex items-start justify-between px-6">
             <div className="absolute left-10 right-10 top-4 h-px bg-slate-200" />
-            {[
-              { num: 1, label: "IDENTITY" },
-              { num: 2, label: "JOURNEY" },
-              { num: 3, label: "CONFIRM" },
-            ].map((s) => {
+            {STEPS.map((s) => {
               const isActive = step === s.num;
               const isDone = step > s.num;
               return (
@@ -201,7 +379,7 @@ export default function UploadOfferingForm() {
           </div>
         </div>
 
-        <div className="w-full max-w-6xl mx-auto  overflow-hidden font-sans ">
+        <div className="w-full max-w-6xl mx-auto overflow-hidden font-sans">
           <div className="p-8 md:p-10">
             {error && (
               <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 text-sm font-medium flex items-start gap-3">
@@ -213,7 +391,11 @@ export default function UploadOfferingForm() {
             )}
 
             <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              {step === 1 && (
+              {/* ── Step 1: Guidance ── */}
+              {step === 1 && <GuidanceStep />}
+
+              {/* ── Step 2: Identity ── */}
+              {step === 2 && (
                 <>
                   <PersonalInfoSection
                     formData={formData}
@@ -238,7 +420,9 @@ export default function UploadOfferingForm() {
                   />
                 </>
               )}
-              {(step === 2 || step === 3) && (
+
+              {/* ── Steps 3 & 4: Document / Confirm ── */}
+              {(step === 3 || step === 4) && (
                 <>
                   <DocumentSection
                     file={file}
@@ -262,7 +446,7 @@ export default function UploadOfferingForm() {
                       setSuggestionActionCompleted(actionCompleted);
                     }}
                   />
-                  {step === 3 && isReviewing && (
+                  {step === 4 && isReviewing && (
                     <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl text-slate-800 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
                       <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5 text-blue-700">
                         i
@@ -275,7 +459,7 @@ export default function UploadOfferingForm() {
                           We have quickly checked your document&apos;s text to
                           ensure proper spelling and formatting. Please review
                           the text above to make sure it is correct. If you
-                          agree, click &ldquo;Confirm & Submit&rdquo; below.
+                          agree, click &ldquo;Confirm &amp; Submit&rdquo; below.
                         </p>
                       </div>
                     </div>
@@ -285,7 +469,7 @@ export default function UploadOfferingForm() {
             </div>
           </div>
 
-          {/* Form Action Footer — stack on mobile when both actions show (step 2/3) */}
+          {/* ── Form Action Footer ── */}
           <div
             className={
               step > 1
@@ -295,74 +479,28 @@ export default function UploadOfferingForm() {
           >
             {step > 1 ? (
               <Button
-                onClick={() => {
-                  if (step === 3) {
-                    setIsReviewing(false);
-                    setSuggestionRequiresAction(false);
-                    setSuggestionActionCompleted(false);
-                  }
-                  setStep((prev) => (prev - 1) as 1 | 2);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
+                onClick={handleBack}
                 variant="ghost"
                 disabled={isSubmitting || isFixingText}
                 className="text-slate-600 hover:bg-slate-100 px-2 py-2 text-sm rounded-full gap-1.5 self-start sm:self-auto shrink-0"
               >
-                <ArrowLeft
-                  className="size-4 shrink-0"
-                  aria-hidden
-                />
+                <ArrowLeft className="size-4 shrink-0" aria-hidden />
                 Go Back
               </Button>
             ) : (
-              <div /> // Placeholder to keep the flex alignment when there's no Back button
+              <div />
             )}
 
             <Button
-              onClick={() => {
-                if (step === 1) {
-                  if (validateStep1()) {
-                    setStep(2);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }
-                } else if (step === 2) {
-                  if (validateStep2()) {
-                    handleAutoCorrection(setExtractedText, () => {
-                      setStep(3);
-                    });
-                  }
-                } else if (step === 3) {
-                  submitFinal();
-                }
-              }}
-              disabled={
-                isSubmitting ||
-                isParsing ||
-                isFixingText ||
-                (step === 2 && (!file || !extractedText)) ||
-                (step === 3 &&
-                  suggestionRequiresAction &&
-                  !suggestionActionCompleted)
-              }
+              onClick={handleNext}
+              disabled={isNextDisabled}
               size="lg"
-              className={`h-12 px-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed font-semibold w-full sm:w-auto min-w-0 shadow-sm transition-colors ${
-                step === 3
-                  ? "bg-slate-900 text-white hover:bg-slate-800"
-                  : "bg-amber-400 text-slate-900 hover:bg-amber-300"
-              }`}
+              className={`h-12 px-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed font-semibold w-full sm:w-auto min-w-0 shadow-sm transition-colors ${step === 4
+                ? "bg-slate-900 text-white hover:bg-slate-800"
+                : "bg-amber-400 text-slate-900 hover:bg-amber-300"
+                }`}
             >
-              {isSubmitting || isFixingText ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />{" "}
-                  {isFixingText ? "Reviewing text..." : "Submitting..."}
-                </>
-              ) : step === 1 ? (
-                "Continue to Step 2"
-              ) : step === 2 ? (
-                "Process Document"
-              ) : (
-                "Confirm & Submit"
-              )}
+              {nextLabel()}
             </Button>
           </div>
         </div>
