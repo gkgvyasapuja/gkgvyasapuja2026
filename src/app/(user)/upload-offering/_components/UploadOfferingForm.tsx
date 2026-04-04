@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 
 import {
   checkUserByEmail,
@@ -18,9 +18,16 @@ import { PersonalInfoSection } from "./PersonalInfoSection";
 import { InitiationSection } from "./InitiationSection";
 import { LocationSection } from "./LocationSection";
 import { DocumentSection } from "./DocumentSection";
-import { SuccessState } from "./SuccessState";
 import { ExistingUserModal } from "./ExistingUserModal";
 import { OfferingFormData } from "./types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -67,10 +74,12 @@ function emptyFormExceptEmail(email: string): OfferingFormData {
 
 export default function UploadOfferingForm() {
   const router = useRouter();
+  const formContainerRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [error, setError] = useState<string | null>(null);
   const [existingUserModalOpen, setExistingUserModalOpen] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const savedProfileRef = useRef<ExistingUserProfile | null>(null);
   const dismissedModalEmailRef = useRef<string | null>(null);
 
@@ -91,6 +100,7 @@ export default function UploadOfferingForm() {
   const {
     isSubmitting,
     success,
+    setSuccess,
     submitFinal,
     validateStep1,
     validateStep2,
@@ -99,6 +109,56 @@ export default function UploadOfferingForm() {
     setIsReviewing,
     isReviewing,
   } = useSubmitOffering(formData, setFormData, file, extractedText, setError);
+
+  useEffect(() => {
+    if (success) {
+      setSuccessModalOpen(true);
+    }
+  }, [success]);
+
+  const handleCloseModal = () => {
+    setSuccessModalOpen(false);
+    setSuccess(false);
+    router.push("/");
+  };
+
+  const handleModalClose = (open: boolean) => {
+    if (!open) {
+      // Reset form to initial state
+      setStep(1);
+      setSuccess(false);
+      setError(null);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        gender: "",
+        email: "",
+        phone: "",
+        initiated: false,
+        initiatedName: "",
+        initiationType: "",
+        initiationYear: "",
+        countryId: "",
+        stateId: "",
+        cityId: "",
+        templeId: "",
+        language: "English",
+      });
+      setExtractedText("");
+      setSuggestionRequiresAction(false);
+      setSuggestionActionCompleted(false);
+      setIsReviewing(false);
+      // Reset file input
+      const fileInput = document.getElementById(
+        "offering-doc-upload",
+      ) as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = "";
+      }
+      // Refresh the page
+      window.location.reload();
+    }
+  };
 
   const handleEmailChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -146,10 +206,6 @@ export default function UploadOfferingForm() {
     savedProfileRef.current = null;
   };
 
-  if (success) {
-    return <SuccessState onReturnHome={() => router.push("/")} />;
-  }
-
   return (
     <>
       <ExistingUserModal
@@ -158,7 +214,44 @@ export default function UploadOfferingForm() {
         onUseSaved={handleUseSavedProfile}
         onSkipAndReenter={handleSkipAndReenter}
       />
-      <div className="w-full flex flex-col items-center gap-6">
+      <Dialog
+        open={successModalOpen}
+        onOpenChange={handleModalClose}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-gray-900">
+              Hare Krishna!
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 pt-2">
+              Your offering for the Vyas Puja has been successfully submitted
+              and stored.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center gap-3 pt-4 flex-col-reverse sm:flex-row">
+            <Button
+              onClick={() => handleModalClose(false)}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCloseModal}
+              className="bg-blue-600 text-white hover:bg-blue-700 w-full sm:w-auto"
+            >
+              Return to Home
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <div
+        ref={formContainerRef}
+        className="w-full flex flex-col items-center gap-6"
+      >
         {/* Stepper */}
         <div className="w-full max-w-md mx-auto">
           <div className="relative flex items-start justify-between px-6">
@@ -302,7 +395,13 @@ export default function UploadOfferingForm() {
                     setSuggestionActionCompleted(false);
                   }
                   setStep((prev) => (prev - 1) as 1 | 2);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
+                  // Scroll to form container
+                  setTimeout(() => {
+                    formContainerRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }, 0);
                 }}
                 variant="ghost"
                 disabled={isSubmitting || isFixingText}
@@ -323,7 +422,13 @@ export default function UploadOfferingForm() {
                 if (step === 1) {
                   if (validateStep1()) {
                     setStep(2);
-                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    // Scroll to form container
+                    setTimeout(() => {
+                      formContainerRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }, 0);
                   }
                 } else if (step === 2) {
                   if (validateStep2()) {
@@ -359,7 +464,7 @@ export default function UploadOfferingForm() {
               ) : step === 1 ? (
                 "Continue to Step 2"
               ) : step === 2 ? (
-                "Process Document"
+                "Verify Document"
               ) : (
                 "Confirm & Submit"
               )}
