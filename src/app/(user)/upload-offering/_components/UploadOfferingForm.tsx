@@ -31,6 +31,12 @@ import {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const STEPS: readonly { num: 1 | 2 | 3; label: string }[] = [
+  { num: 1, label: "GUIDANCE" },
+  { num: 2, label: "YOUR DETAILS" },
+  { num: 3, label: "OFFERING" },
+] as const;
+
 function profileToFormData(
   user: ExistingUserProfile,
   language: string,
@@ -213,20 +219,38 @@ export default function UploadOfferingForm() {
     isSubmitting,
     success,
     setSuccess,
-    submitFinal,
     validateStep1,
-    validateStep2,
-    handleAutoCorrection,
+    submitFinal,
+    runGrammarReview,
     isFixingText,
     setIsReviewing,
     isReviewing,
   } = useSubmitOffering(formData, setFormData, file, extractedText, setError);
+
+  const grammarReviewKeyRef = useRef<string | null>(null);
+  const runGrammarReviewRef = useRef(runGrammarReview);
+  runGrammarReviewRef.current = runGrammarReview;
 
   useEffect(() => {
     if (success) {
       setSuccessModalOpen(true);
     }
   }, [success]);
+
+  /** After .docx parses on step 3, run AI review once per file (no extra “verify” clicks). */
+  useEffect(() => {
+    if (!file) {
+      grammarReviewKeyRef.current = null;
+      return;
+    }
+    if (step !== 3 || isParsing || !extractedText.trim()) return;
+
+    const key = `${file.name}-${file.size}-${file.lastModified}`;
+    if (grammarReviewKeyRef.current === key) return;
+    grammarReviewKeyRef.current = key;
+
+    void runGrammarReviewRef.current(extractedText, setExtractedText);
+  }, [step, file, extractedText, isParsing, setExtractedText]);
 
   const handleCloseModal = () => {
     setSuccessModalOpen(false);
@@ -442,21 +466,21 @@ export default function UploadOfferingForm() {
                 </>
               )}
 
-              {/* ── Steps 3 & 4: Document / Confirm ── */}
-              {(step === 3 || step === 4) && (
+              {/* ── Step 3: Document / Confirm ── */}
+              {step === 3 && (
                 <>
                   <DocumentSection
                     file={file}
                     handleFileChange={(e) => {
-                      handleFileChange(e);
+                      grammarReviewKeyRef.current = null;
                       setIsReviewing(false);
+                      setSuggestionRequiresAction(false);
+                      setSuggestionActionCompleted(false);
+                      handleFileChange(e);
                     }}
                     isParsing={isParsing}
                     extractedText={extractedText}
-                    setExtractedText={(text) => {
-                      setExtractedText(text);
-                      setIsReviewing(false);
-                    }}
+                    setExtractedText={setExtractedText}
                     formData={formData}
                     handleSelectChange={handleSelectChange}
                     onSuggestionStateChange={(
@@ -467,20 +491,21 @@ export default function UploadOfferingForm() {
                       setSuggestionActionCompleted(actionCompleted);
                     }}
                   />
-                  {step === 4 && isReviewing && (
+                  {(isFixingText || isReviewing) && (
                     <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl text-slate-800 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
                       <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5 text-blue-700">
                         i
                       </div>
                       <div className="flex flex-col gap-1">
                         <p className="font-semibold text-slate-900">
-                          Review your offering
+                          {isFixingText
+                            ? "Checking your offering"
+                            : "Review your offering"}
                         </p>
                         <p className="text-md text-slate-700">
-                          We have quickly checked your document&apos;s text to
-                          ensure proper spelling and formatting. Please review
-                          the text above to make sure it is correct. If you
-                          agree, click &ldquo;Confirm &amp; Submit&rdquo; below.
+                          {isFixingText
+                            ? "Our assistant is reviewing spelling and formatting. Suggestions will appear here when ready."
+                            : "Review the text and any suggestions on the right, then use Submit offering below when you are ready."}
                         </p>
                       </div>
                     </div>
@@ -502,6 +527,7 @@ export default function UploadOfferingForm() {
               <Button
                 onClick={() => {
                   if (step === 3) {
+                    grammarReviewKeyRef.current = null;
                     setIsReviewing(false);
                     setSuggestionRequiresAction(false);
                     setSuggestionActionCompleted(false);
@@ -529,9 +555,17 @@ export default function UploadOfferingForm() {
             <Button
               onClick={() => {
                 if (step === 1) {
+                  setError(null);
+                  setStep(2);
+                  setTimeout(() => {
+                    formContainerRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }, 0);
+                } else if (step === 2) {
                   if (validateStep1()) {
-                    setStep(2);
-                    // Scroll to form container
+                    setStep(3);
                     setTimeout(() => {
                       formContainerRef.current?.scrollIntoView({
                         behavior: "smooth",
@@ -539,27 +573,23 @@ export default function UploadOfferingForm() {
                       });
                     }, 0);
                   }
-                } else if (step === 2) {
-                  if (validateStep2()) {
-                    handleAutoCorrection(setExtractedText, () => {
-                      setStep(3);
-                    });
-                  }
                 } else if (step === 3) {
-                  submitFinal();
+                  void submitFinal();
                 }
               }}
               disabled={
                 isSubmitting ||
                 isParsing ||
                 isFixingText ||
-                (step === 2 && (!file || !extractedText)) ||
                 (step === 3 &&
-                  suggestionRequiresAction &&
-                  !suggestionActionCompleted)
+                  (!file ||
+                    !extractedText.trim() ||
+                    !isReviewing ||
+                    (suggestionRequiresAction &&
+                      !suggestionActionCompleted)))
               }
               size="lg"
-              className={`h-12 px-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed font-semibold w-full sm:w-auto min-w-0 shadow-sm transition-colors ${step === 4
+              className={`h-12 px-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed font-semibold w-full sm:w-auto min-w-0 shadow-sm transition-colors ${step === 3
                 ? "bg-slate-900 text-white hover:bg-slate-800"
                 : "bg-amber-400 text-slate-900 hover:bg-amber-300"
                 }`}
@@ -567,14 +597,14 @@ export default function UploadOfferingForm() {
               {isSubmitting || isFixingText ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />{" "}
-                  {isFixingText ? "Reviewing text..." : "Submitting..."}
+                  {isFixingText ? "Reviewing with AI…" : "Submitting..."}
                 </>
               ) : step === 1 ? (
                 "Continue to Step 2"
               ) : step === 2 ? (
-                "Verify Document"
+                "Continue to offering"
               ) : (
-                "Confirm & Submit"
+                "Submit offering"
               )}
             </Button>
           </div>

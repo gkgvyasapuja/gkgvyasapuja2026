@@ -98,47 +98,47 @@ export function useSubmitOffering(
     }
   };
 
-  const handleAutoCorrection = async (
+  /** Runs AI grammar review on the given HTML (typically latest `extractedText`). Submit uses `submitFinal` separately. */
+  const runGrammarReview = async (
+    sourceHtml: string,
     setExtractedText: (text: string) => void,
-    onSuccess?: () => void,
+    onComplete?: () => void,
   ) => {
-    if (!validateStep2()) return;
+    if (!file || !sourceHtml.trim()) {
+      setError("Please upload a valid .docx offering document.");
+      return;
+    }
 
-    if (!isReviewing) {
-      setIsFixingText(true);
-      setError(null);
-      try {
-        const result = await fixGrammar(extractedText);
-        if (result.success && result.text) {
-          setExtractedText(result.text);
-          if (result.language) {
-            setFormData((prev) => ({ ...prev, language: result.language }));
-          }
-
-          if (result.text.includes("ai-correction")) {
-            toast.success(
-              "We have updated some changes in the offering, if you don't want them please reject it.",
-              {
-                className: "bg-[#0a2540] text-white border border-white/20",
-              },
-            );
-          } else {
-            toast.success("All good! No changes from our side.", {
-              className: "bg-[#0a2540] text-white border border-white/20",
-            });
-          }
+    setIsFixingText(true);
+    setError(null);
+    try {
+      const result = await fixGrammar(sourceHtml);
+      if (result.success && result.text) {
+        setExtractedText(result.text);
+        if (result.language) {
+          setFormData((prev) => ({ ...prev, language: result.language }));
         }
-      } catch (err) {
-        console.error("Grammar fix failed", err);
-      } finally {
-        setIsFixingText(false);
-        setIsReviewing(true);
-        if (onSuccess) onSuccess();
-        // Ensure user can see the updated text
-        window.scrollBy({ top: 300, behavior: "smooth" });
+
+        if (result.text.includes("ai-correction")) {
+          toast.success(
+            "We have updated some changes in the offering, if you don't want them please reject it.",
+            {
+              className: "bg-[#0a2540] text-white border border-white/20",
+            },
+          );
+        } else {
+          toast.success("All good! No changes from our side.", {
+            className: "bg-[#0a2540] text-white border border-white/20",
+          });
+        }
       }
-    } else {
-      await submitFinal();
+    } catch (err) {
+      console.error("Grammar fix failed", err);
+    } finally {
+      setIsFixingText(false);
+      setIsReviewing(true);
+      onComplete?.();
+      window.scrollBy({ top: 300, behavior: "smooth" });
     }
   };
 
@@ -150,7 +150,7 @@ export function useSubmitOffering(
     validateForm,
     validateStep1,
     validateStep2,
-    handleAutoCorrection,
+    runGrammarReview,
     isReviewing,
     isFixingText,
     setIsReviewing,
