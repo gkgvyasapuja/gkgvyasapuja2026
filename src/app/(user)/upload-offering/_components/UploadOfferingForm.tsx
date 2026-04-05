@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 
 import {
   checkUserByEmail,
@@ -18,9 +18,16 @@ import { PersonalInfoSection } from "./PersonalInfoSection";
 import { InitiationSection } from "./InitiationSection";
 import { LocationSection } from "./LocationSection";
 import { DocumentSection } from "./DocumentSection";
-import { SuccessState } from "./SuccessState";
 import { ExistingUserModal } from "./ExistingUserModal";
 import { OfferingFormData } from "./types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -179,12 +186,12 @@ function GuidanceStep() {
 // ─── Main form component ──────────────────────────────────────────────────────
 export default function UploadOfferingForm() {
   const router = useRouter();
-
-  // Steps: 1=Guidance  2=Identity  3=Journey  4=Confirm
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const formContainerRef = useRef<HTMLDivElement>(null);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [error, setError] = useState<string | null>(null);
   const [existingUserModalOpen, setExistingUserModalOpen] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
   const savedProfileRef = useRef<ExistingUserProfile | null>(null);
   const dismissedModalEmailRef = useRef<string | null>(null);
 
@@ -205,6 +212,7 @@ export default function UploadOfferingForm() {
   const {
     isSubmitting,
     success,
+    setSuccess,
     submitFinal,
     validateStep1,
     validateStep2,
@@ -214,7 +222,56 @@ export default function UploadOfferingForm() {
     isReviewing,
   } = useSubmitOffering(formData, setFormData, file, extractedText, setError);
 
-  // ── Email helpers ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (success) {
+      setSuccessModalOpen(true);
+    }
+  }, [success]);
+
+  const handleCloseModal = () => {
+    setSuccessModalOpen(false);
+    setSuccess(false);
+    router.push("/");
+  };
+
+  const handleModalClose = (open: boolean) => {
+    if (!open) {
+      // Reset form to initial state
+      setStep(1);
+      setSuccess(false);
+      setError(null);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        gender: "",
+        email: "",
+        phone: "",
+        initiated: false,
+        initiatedName: "",
+        initiationType: "",
+        initiationYear: "",
+        countryId: "",
+        stateId: "",
+        cityId: "",
+        templeId: "",
+        language: "English",
+      });
+      setExtractedText("");
+      setSuggestionRequiresAction(false);
+      setSuggestionActionCompleted(false);
+      setIsReviewing(false);
+      // Reset file input
+      const fileInput = document.getElementById(
+        "offering-doc-upload",
+      ) as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = "";
+      }
+      // Refresh the page
+      window.location.reload();
+    }
+  };
+
   const handleEmailChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -259,78 +316,6 @@ export default function UploadOfferingForm() {
     savedProfileRef.current = null;
   };
 
-  if (success) {
-    return <SuccessState onReturnHome={() => router.push("/")} />;
-  }
-
-  // ── Stepper config ────────────────────────────────────────────────────────
-  const STEPS = [
-    { num: 1, label: "GUIDANCE" },
-    { num: 2, label: "IDENTITY" },
-    { num: 3, label: "JOURNEY" },
-    { num: 4, label: "CONFIRM" },
-  ] as const;
-
-  // ── Primary action handler ────────────────────────────────────────────────
-  const handleNext = () => {
-    if (step === 1) {
-      // Guidance → Identity: no validation required
-      setStep(2);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } else if (step === 2) {
-      // Identity → Journey
-      if (validateStep1()) {
-        setStep(3);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-    } else if (step === 3) {
-      // Journey → Confirm
-      if (validateStep2()) {
-        handleAutoCorrection(setExtractedText, () => {
-          setStep(4);
-        });
-      }
-    } else if (step === 4) {
-      // Confirm → Submit
-      submitFinal();
-    }
-  };
-
-  // ── Back handler ──────────────────────────────────────────────────────────
-  const handleBack = () => {
-    if (step === 4) {
-      setIsReviewing(false);
-      setSuggestionRequiresAction(false);
-      setSuggestionActionCompleted(false);
-    }
-    setStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  // ── Button label ──────────────────────────────────────────────────────────
-  const nextLabel = () => {
-    if (isSubmitting || isFixingText) {
-      return (
-        <>
-          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-          {isFixingText ? "Reviewing text..." : "Submitting..."}
-        </>
-      );
-    }
-    if (step === 1) return "Continue to Step 2";
-    if (step === 2) return "Continue to Step 3";
-    if (step === 3) return "Process Document";
-    return "Confirm & Submit";
-  };
-
-  // ── Next button disabled state ────────────────────────────────────────────
-  const isNextDisabled =
-    isSubmitting ||
-    isParsing ||
-    isFixingText ||
-    (step === 3 && (!file || !extractedText)) ||
-    (step === 4 && suggestionRequiresAction && !suggestionActionCompleted);
-
   return (
     <>
       <ExistingUserModal
@@ -339,9 +324,45 @@ export default function UploadOfferingForm() {
         onUseSaved={handleUseSavedProfile}
         onSkipAndReenter={handleSkipAndReenter}
       />
-
-      <div className="w-full flex flex-col items-center gap-6">
-        {/* ── Stepper ── */}
+      <Dialog
+        open={successModalOpen}
+        onOpenChange={handleModalClose}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center">
+            <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-gray-900">
+              Hare Krishna!
+            </DialogTitle>
+            <DialogDescription className="text-gray-600 pt-2">
+              Your offering for the Vyas Puja has been successfully submitted
+              and stored.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center gap-3 pt-4 flex-col-reverse sm:flex-row">
+            <Button
+              onClick={() => handleModalClose(false)}
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCloseModal}
+              className="bg-blue-600 text-white hover:bg-blue-700 w-full sm:w-auto"
+            >
+              Return to Home
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <div
+        ref={formContainerRef}
+        className="w-full flex flex-col items-center gap-6"
+      >
+        {/* Stepper */}
         <div className="w-full max-w-md mx-auto">
           <div className="relative flex items-start justify-between px-6">
             <div className="absolute left-10 right-10 top-4 h-px bg-slate-200" />
@@ -479,7 +500,21 @@ export default function UploadOfferingForm() {
           >
             {step > 1 ? (
               <Button
-                onClick={handleBack}
+                onClick={() => {
+                  if (step === 3) {
+                    setIsReviewing(false);
+                    setSuggestionRequiresAction(false);
+                    setSuggestionActionCompleted(false);
+                  }
+                  setStep((prev) => (prev - 1) as 1 | 2);
+                  // Scroll to form container
+                  setTimeout(() => {
+                    formContainerRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }, 0);
+                }}
                 variant="ghost"
                 disabled={isSubmitting || isFixingText}
                 className="text-slate-600 hover:bg-slate-100 px-2 py-2 text-sm rounded-full gap-1.5 self-start sm:self-auto shrink-0"
@@ -492,15 +527,55 @@ export default function UploadOfferingForm() {
             )}
 
             <Button
-              onClick={handleNext}
-              disabled={isNextDisabled}
+              onClick={() => {
+                if (step === 1) {
+                  if (validateStep1()) {
+                    setStep(2);
+                    // Scroll to form container
+                    setTimeout(() => {
+                      formContainerRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      });
+                    }, 0);
+                  }
+                } else if (step === 2) {
+                  if (validateStep2()) {
+                    handleAutoCorrection(setExtractedText, () => {
+                      setStep(3);
+                    });
+                  }
+                } else if (step === 3) {
+                  submitFinal();
+                }
+              }}
+              disabled={
+                isSubmitting ||
+                isParsing ||
+                isFixingText ||
+                (step === 2 && (!file || !extractedText)) ||
+                (step === 3 &&
+                  suggestionRequiresAction &&
+                  !suggestionActionCompleted)
+              }
               size="lg"
               className={`h-12 px-8 rounded-full disabled:opacity-50 disabled:cursor-not-allowed font-semibold w-full sm:w-auto min-w-0 shadow-sm transition-colors ${step === 4
                 ? "bg-slate-900 text-white hover:bg-slate-800"
                 : "bg-amber-400 text-slate-900 hover:bg-amber-300"
                 }`}
             >
-              {nextLabel()}
+              {isSubmitting || isFixingText ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />{" "}
+                  {isFixingText ? "Reviewing text..." : "Submitting..."}
+                </>
+              ) : step === 1 ? (
+                "Continue to Step 2"
+              ) : step === 2 ? (
+                "Verify Document"
+              ) : (
+                "Confirm & Submit"
+              )}
             </Button>
           </div>
         </div>

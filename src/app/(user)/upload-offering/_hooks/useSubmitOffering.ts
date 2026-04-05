@@ -100,7 +100,7 @@ export function useSubmitOffering(
 
   const handleAutoCorrection = async (
     setExtractedText: (text: string) => void,
-    onSuccess?: () => void
+    onSuccess?: () => void,
   ) => {
     if (!validateStep2()) return;
 
@@ -116,9 +116,12 @@ export function useSubmitOffering(
           }
 
           if (result.text.includes("ai-correction")) {
-            toast.success("We have updated some changes in the offering, if you don't want them please reject it.", {
-              className: "bg-[#0a2540] text-white border border-white/20",
-            });
+            toast.success(
+              "We have updated some changes in the offering, if you don't want them please reject it.",
+              {
+                className: "bg-[#0a2540] text-white border border-white/20",
+              },
+            );
           } else {
             toast.success("All good! No changes from our side.", {
               className: "bg-[#0a2540] text-white border border-white/20",
@@ -142,6 +145,7 @@ export function useSubmitOffering(
   return {
     isSubmitting,
     success,
+    setSuccess,
     submitFinal,
     validateForm,
     validateStep1,
