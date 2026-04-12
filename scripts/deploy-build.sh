@@ -36,3 +36,6 @@ ssh "${SSH_OPTS[@]}" "$USER@$HOST" "mkdir -p '$DEST' && tar xzf '/tmp/$ARCHIVE' 
 
 rm -f "$ARCHIVE"
 echo "Deployed to $DEST — run: cd $DEST && NODE_ENV=production PORT=3000 node server.js"
+
+
+# after this run, unzip -oq path
