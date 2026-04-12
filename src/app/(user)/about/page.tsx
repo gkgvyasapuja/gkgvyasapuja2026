@@ -13,9 +13,9 @@ const About = () => {
                 The Eternal Guide
               </p>
               <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.1]">
-                His Divine Grace
+                His Holiness
                 <br />
-                <span className="text-[#0a2540]">Guru Maharaja</span>
+                <span className="text-[#0a2540]">Gopal Krishna Goswami Maharaj</span>
               </h1>
               <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
                 A life dedicated to the mission of Sri Chaitanya Mahaprabhu,
@@ -259,7 +259,7 @@ const About = () => {
               </p>
             </blockquote>
             <figcaption className="mt-8 text-base font-semibold text-foreground not-italic">
-              — Guru Maharaja
+              — His Holiness Gopal Krishna Goswami Maharaj
             </figcaption>
           </figure>
         </div>

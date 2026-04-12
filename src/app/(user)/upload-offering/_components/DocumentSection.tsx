@@ -142,7 +142,7 @@ export function DocumentSection({
             <h3
               className={`text-lg md:text-xl font-bold ${navy} font-serif mb-2`}
             >
-              Upload Your Offering Letter
+              Upload Your Offering
             </h3>
             <p className="text-slate-500 text-sm mb-6 max-w-md">
               Drag and drop your document here or click to browse
@@ -157,7 +157,7 @@ export function DocumentSection({
               Select .docx File
             </span>
             <p className="mt-8 text-[10px] font-semibold tracking-[0.2em] text-slate-400 uppercase">
-              Max file size: 10MB
+              Max file size: 2MB
             </p>
           </div>
           <input
