@@ -29,6 +29,13 @@
       "when": 1743868800000,
       "tag": "0003_offering_document_url",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776014835608,
+      "tag": "0004_tearful_multiple_man",
+      "breakpoints": true
     }
   ]
 }

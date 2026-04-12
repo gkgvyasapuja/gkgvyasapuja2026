@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { submitOffering } from "@/app/(admin)/actions/offering";
 import { fixGrammar } from "@/app/(admin)/actions/ai";
 import { OfferingFormData } from "../_components/types";
@@ -10,11 +10,18 @@ export function useSubmitOffering(
   file: File | null,
   extractedText: string,
   setError: (error: string | null) => void,
+  hasImages = false,
 ) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [isFixingText, setIsFixingText] = useState(false);
+  /** True when AI returned no usable text (or threw); hides the “review” info panel so submit stays primary. */
+  const [aiGrammarFailed, setAiGrammarFailed] = useState(false);
+
+  useEffect(() => {
+    setAiGrammarFailed(false);
+  }, [file]);
 
   const validateStep1 = () => {
     if (
@@ -125,8 +132,19 @@ export function useSubmitOffering(
       return;
     }
 
+    // Images are not sent through AI review; user can submit after preview.
+    if (hasImages) {
+      setError(null);
+      setAiGrammarFailed(false);
+      setIsReviewing(true);
+      onComplete?.();
+      window.scrollBy({ top: 300, behavior: "smooth" });
+      return;
+    }
+
     setIsFixingText(true);
     setError(null);
+    setAiGrammarFailed(false);
     try {
       const result = await fixGrammar(sourceHtml);
       if (result.success && result.text) {
@@ -147,9 +165,12 @@ export function useSubmitOffering(
             className: "bg-[#0a2540] text-white border border-white/20",
           });
         }
+      } else {
+        setAiGrammarFailed(true);
       }
     } catch (err) {
       console.error("Grammar fix failed", err);
+      setAiGrammarFailed(true);
     } finally {
       setIsFixingText(false);
       setIsReviewing(true);
@@ -170,5 +191,6 @@ export function useSubmitOffering(
     isReviewing,
     isFixingText,
     setIsReviewing,
+    aiGrammarFailed,
   };
 }

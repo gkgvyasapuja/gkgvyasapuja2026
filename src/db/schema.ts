@@ -2,6 +2,7 @@ import {
   boolean,
   integer,
   pgTable,
+  text,
   timestamp,
   uuid,
   varchar,
@@ -101,7 +102,7 @@ export const offerings = pgTable("offering", {
   userId: uuid("user_id").notNull(),
   year: varchar("year", { length: 255 }).notNull(),
 
-  offering: varchar("offering", { length: 10000 }).notNull(),
+  offering: text("offering").notNull(),
 
   /** Public URL of the uploaded .docx in S3. */
   documentUrl: varchar("document_url", { length: 2048 }),

@@ -207,8 +207,14 @@ export default function UploadOfferingForm() {
     formData,
     setFormData,
   );
-  const { file, extractedText, setExtractedText, isParsing, handleFileChange } =
-    useDocumentHandling(setError);
+  const {
+    file,
+    extractedText,
+    setExtractedText,
+    isParsing,
+    hasImages,
+    handleFileChange,
+  } = useDocumentHandling(setError);
 
   const [suggestionRequiresAction, setSuggestionRequiresAction] =
     useState(false);
@@ -225,7 +231,15 @@ export default function UploadOfferingForm() {
     isFixingText,
     setIsReviewing,
     isReviewing,
-  } = useSubmitOffering(formData, setFormData, file, extractedText, setError);
+    aiGrammarFailed,
+  } = useSubmitOffering(
+    formData,
+    setFormData,
+    file,
+    extractedText,
+    setError,
+    hasImages,
+  );
 
   const grammarReviewKeyRef = useRef<string | null>(null);
   const runGrammarReviewRef = useRef(runGrammarReview);
@@ -491,7 +505,8 @@ export default function UploadOfferingForm() {
                       setSuggestionActionCompleted(actionCompleted);
                     }}
                   />
-                  {(isFixingText || isReviewing) && (
+                  {(isFixingText ||
+                    (isReviewing && !hasImages && !aiGrammarFailed)) && (
                     <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl text-slate-800 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2">
                       <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center shrink-0 mt-0.5 text-blue-700">
                         i

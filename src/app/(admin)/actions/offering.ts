@@ -288,11 +288,25 @@ export async function parseDocx(formData: FormData) {
     }
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    let hasImages = false;
     const result = await mammoth.convertToHtml(
       { buffer },
-      { ignoreEmptyParagraphs: false },
+      {
+        ignoreEmptyParagraphs: false,
+        convertImage: mammoth.images.imgElement(function (image: {
+          contentType: string;
+          readAsBase64String: () => Promise<string>;
+        }) {
+          hasImages = true;
+          return image.readAsBase64String().then(function (imageBuffer: string) {
+            return {
+              src: "data:" + image.contentType + ";base64," + imageBuffer,
+            };
+          });
+        }),
+      },
     );
-    return { success: true, text: result.value };
+    return { success: true, text: result.value, hasImages };
   } catch (error) {
     console.error("Failed to parse docx:", error);
     return {
