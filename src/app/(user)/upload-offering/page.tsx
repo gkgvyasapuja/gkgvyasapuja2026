@@ -41,7 +41,7 @@ export default function UploadOfferingPage() {
             </a>{" "}
             section. You can even{" "}
             <a
-              href="https://gkgvyasapuja.blob.core.windows.net/offerings/Sample%20Offering%20English%20And%20Hindi.pdf"
+              href="https://gkg-vyasa-puja.s3.us-east-1.amazonaws.com/assets/Sample+Offering+English.docx"
               target="_blank"
               rel="noreferrer noopener"
               className="text-blue-500 underline"

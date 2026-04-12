@@ -597,7 +597,7 @@ export default function UploadOfferingForm() {
               {isSubmitting || isFixingText ? (
                 <>
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />{" "}
-                  {isFixingText ? "Reviewing with AI…" : "Submitting..."}
+                  {isFixingText ? "Reviewing" : "Submitting..."}
                 </>
               ) : step === 1 ? (
                 "Continue to Step 2"
