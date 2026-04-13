@@ -15,6 +15,7 @@
     "db:seed:cities": "tsx src/scripts/seed-cities.ts",
     "db:seed:users": "tsx src/scripts/seed-users.ts",
     "db:seed:temples": "tsx src/scripts/seed-temples.ts",
+    "db:dedupe:temples": "tsx src/scripts/dedupe-temples-by-name.ts",
     "db:seed:books": "tsx src/scripts/seed-books.ts",
     "studio": "npx drizzle-kit studio"
   },
