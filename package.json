@@ -13,6 +13,7 @@
     "db:seed:countries": "tsx src/scripts/seed-countries.ts",
     "db:seed:states": "tsx src/scripts/seed-states.ts",
     "db:seed:cities": "tsx src/scripts/seed-cities.ts",
+    "db:seed:users": "tsx src/scripts/seed-users.ts",
     "db:seed:temples": "tsx src/scripts/seed-temples.ts",
     "db:seed:books": "tsx src/scripts/seed-books.ts",
     "studio": "npx drizzle-kit studio"
