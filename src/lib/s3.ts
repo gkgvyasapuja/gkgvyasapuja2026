@@ -69,6 +69,50 @@ export async function uploadOfferingDocx(params: {
   return { key, url: publicObjectUrl(key) };
 }
 
+const ADMIN_MEDIA_PREFIX = "admin-media";
+
+function guessContentType(fileName: string): string {
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith(".png")) return "image/png";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+  if (lower.endsWith(".gif")) return "image/gif";
+  if (lower.endsWith(".webp")) return "image/webp";
+  if (lower.endsWith(".svg")) return "image/svg+xml";
+  if (lower.endsWith(".pdf")) return "application/pdf";
+  if (lower.endsWith(".mp4")) return "video/mp4";
+  if (lower.endsWith(".webm")) return "video/webm";
+  if (lower.endsWith(".mp3")) return "audio/mpeg";
+  if (lower.endsWith(".wav")) return "audio/wav";
+  return "application/octet-stream";
+}
+
+/** Upload arbitrary admin media; object is served at `publicObjectUrl(key)` if the bucket allows public GET. */
+export async function uploadAdminMediaFile(params: {
+  buffer: Buffer;
+  originalFileName: string;
+  contentType?: string;
+}): Promise<{ key: string; url: string }> {
+  const { client, bucket } = requireConfig();
+  const safeBase = params.originalFileName
+    .replace(/[^\w.\-]+/g, "_")
+    .slice(0, 180);
+  const key = `${ADMIN_MEDIA_PREFIX}/${randomUUID()}-${safeBase}`;
+  const contentType =
+    params.contentType?.trim() || guessContentType(params.originalFileName);
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      Body: params.buffer,
+      ContentType: contentType,
+      CacheControl: "public, max-age=31536000",
+    }),
+  );
+
+  return { key, url: publicObjectUrl(key) };
+}
+
 export async function deleteObjectByUrl(url: string): Promise<void> {
   const key = objectKeyFromPublicUrl(url);
   if (!key) {

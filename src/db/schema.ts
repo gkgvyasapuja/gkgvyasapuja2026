@@ -125,6 +125,16 @@ export const offerings = pgTable("offering", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+/** Admin-uploaded files in S3; `public_url` is the public HTTPS URL (bucket policy must allow read). */
+export const adminMedia = pgTable("admin_media", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  s3Key: varchar("s3_key", { length: 1024 }).notNull(),
+  publicUrl: varchar("public_url", { length: 2048 }).notNull(),
+  fileName: varchar("file_name", { length: 512 }).notNull(),
+  contentType: varchar("content_type", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 /** Append-only log of staff edits to offerings. */
 export const offeringEditLogs = pgTable("offering_edit_log", {
   id: uuid("id").primaryKey().defaultRandom(),

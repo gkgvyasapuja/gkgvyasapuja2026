@@ -535,6 +535,28 @@ export async function addBook(data: typeof books.$inferInsert) {
   }
 }
 
+export async function updateBook(
+  id: string,
+  data: Pick<
+    typeof books.$inferInsert,
+    "title" | "thumbnail" | "viewUrl" | "downloadUrl" | "publishedYear"
+  >,
+) {
+  try {
+    await db
+      .update(books)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(books.id, id));
+    revalidatePath("/admin-dashboard/books");
+    return { success: true as const };
+  } catch (error: any) {
+    return { success: false as const, error: error.message };
+  }
+}
+
 // --- Offerings Actions ---
 
 const DEFAULT_OFFERINGS_PAGE_SIZE = 20;

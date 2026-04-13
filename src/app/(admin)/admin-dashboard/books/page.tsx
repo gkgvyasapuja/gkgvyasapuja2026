@@ -1,5 +1,6 @@
 import { getBooks } from "@/app/(admin)/actions/admin";
 import { AddBookModal } from "./_components/AddBookModal";
+import { EditBookModal } from "./_components/EditBookModal";
 import {
   Table,
   TableBody,
@@ -31,6 +32,7 @@ export default async function BooksPage() {
               <TableHead>Views</TableHead>
               <TableHead>Downloads</TableHead>
               <TableHead>Links</TableHead>
+              <TableHead className="w-[100px]">Edit</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -71,12 +73,24 @@ export default async function BooksPage() {
                     Download
                   </a>
                 </TableCell>
+                <TableCell>
+                  <EditBookModal
+                    book={{
+                      id: book.id,
+                      title: book.title,
+                      thumbnail: book.thumbnail,
+                      viewUrl: book.viewUrl,
+                      downloadUrl: book.downloadUrl,
+                      publishedYear: book.publishedYear,
+                    }}
+                  />
+                </TableCell>
               </TableRow>
             ))}
             {books.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={6}
                   className="h-24 text-center text-gray-500"
                 >
                   No books found. Add some above.

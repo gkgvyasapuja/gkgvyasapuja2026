@@ -14,6 +14,7 @@ import {
   UserCog,
   ChevronLeft,
   ChevronRight,
+  Images,
 } from "lucide-react";
 
 const navItems = [
@@ -24,6 +25,7 @@ const navItems = [
   { name: "Temples", href: "/admin-dashboard/temples", icon: Building2 },
   { name: "Books", href: "/admin-dashboard/books", icon: BookOpen },
   { name: "Offerings", href: "/admin-dashboard/offerings", icon: BookOpen },
+  { name: "Media", href: "/admin-dashboard/media", icon: Images },
   {
     name: "Manage Maintainers",
     href: "/admin-dashboard/maintainers",
