@@ -81,8 +81,8 @@ function emptyFormExceptEmail(email: string): OfferingFormData {
 // ─── Guidance content (Step 1) ───────────────────────────────────────────────
 function GuidanceStep() {
   return (
-    <div className="space-y-10">
-      <div className="text-center">
+    <div className="w-full min-w-0 space-y-6 sm:space-y-10">
+      <div className="text-center sm:px-0">
         <h2 className="text-2xl md:text-3xl font-semibold text-black mb-4 tracking-tight mt-4">
           Importance of Vyasa-puja for a Disciple
         </h2>
@@ -112,9 +112,9 @@ function GuidanceStep() {
         </p>
       </div>
 
-      <div className="w-full bg-white border border-slate-200 shadow-lg rounded-3xl p-8">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl md:text-4xl font-semibold text-slate-900 mb-2 tracking-tight">
+      <div className="w-full min-w-0 bg-white border border-slate-200 shadow-lg rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8">
+        <div className="text-center mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-slate-900 mb-2 tracking-tight">
             How to Write Vyasa Puja Offering
           </h2>
           <p className="text-sm md:text-base text-slate-600 max-w-3xl mx-auto">
@@ -123,8 +123,8 @@ function GuidanceStep() {
           </p>
         </div>
 
-        <div className="space-y-5 text-slate-700">
-          <section className="bg-sky-50 border-l-4 border-sky-400 p-4 rounded-lg">
+        <div className="space-y-4 sm:space-y-5 text-slate-700 text-[15px] sm:text-base leading-relaxed">
+          <section className="bg-sky-50 border-l-4 border-sky-400 p-3 sm:p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-sky-700">Addressing</h3>
             <p className="mt-2">
               Start with a respectful salutation to Guru Maharaja (e.g. Dear
@@ -133,7 +133,7 @@ function GuidanceStep() {
             </p>
           </section>
 
-          <section className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-lg">
+          <section className="bg-amber-50 border-l-4 border-amber-400 p-3 sm:p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-amber-700">
               Main Offering
             </h3>
@@ -142,7 +142,7 @@ function GuidanceStep() {
               touched you, and relate it to guru-pranamantra or a relevant
               shloka.
             </p>
-            <blockquote className="mt-3 rounded-lg border border-amber-200 bg-white p-4 text-sm text-slate-800">
+            <blockquote className="mt-3 rounded-lg border border-amber-200 bg-white p-3 sm:p-4 text-sm text-slate-800 wrap-break-word">
               <p className="mb-1">
                 &ldquo;titiksavah karunikah, suhrdah sarva-dehinam&rdquo;
               </p>
@@ -157,7 +157,7 @@ function GuidanceStep() {
             </p>
           </section>
 
-          <section className="bg-slate-100 border-l-4 border-slate-400 p-4 rounded-lg">
+          <section className="bg-slate-100 border-l-4 border-slate-400 p-3 sm:p-4 rounded-lg">
             <h3 className="text-lg font-semibold text-slate-900">
               Personal Gratitude
             </h3>
@@ -176,7 +176,7 @@ function GuidanceStep() {
             </ul>
           </section>
 
-          <section className="bg-gradient-to-r from-indigo-50 via-white to-blue-50 border border-blue-200 p-5 rounded-xl">
+          <section className="bg-linear-to-r from-indigo-50 via-white to-blue-50 border border-blue-200 p-4 sm:p-5 rounded-xl">
             <h3 className="text-lg font-semibold text-blue-900">Ending</h3>
             <p className="mt-2 text-slate-700">
               Close with prayer for Guru Maharaja&apos;s long life and health,
@@ -398,7 +398,7 @@ export default function UploadOfferingForm() {
       </Dialog>
       <div
         ref={formContainerRef}
-        className="w-full flex flex-col items-center gap-6"
+        className="w-full min-w-0 flex flex-col items-stretch sm:items-center gap-6"
       >
         {/* Stepper */}
         <div className="w-full max-w-md mx-auto">
@@ -438,8 +438,8 @@ export default function UploadOfferingForm() {
           </div>
         </div>
 
-        <div className="w-full max-w-6xl mx-auto overflow-hidden font-sans">
-          <div className="p-8 md:p-10">
+        <div className="w-full min-w-0 max-w-6xl mx-auto font-sans">
+          <div className="px-0 py-6 sm:px-4 sm:py-8 md:px-8 md:py-10">
             {error && (
               <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-700 text-sm font-medium flex items-start gap-3">
                 <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5 text-red-700">
@@ -534,8 +534,8 @@ export default function UploadOfferingForm() {
           <div
             className={
               step > 1
-                ? "bg-white p-6 md:px-10 border-t border-slate-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 w-full min-w-0"
-                : "bg-white p-6 md:px-10 border-t border-slate-100 flex flex-row justify-end items-center gap-4 w-full min-w-0"
+                ? "bg-white px-4 py-6 sm:px-6 md:px-10 border-t border-slate-100 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 w-full min-w-0"
+                : "bg-white px-4 py-6 sm:px-6 md:px-10 border-t border-slate-100 flex flex-row justify-end items-center gap-4 w-full min-w-0"
             }
           >
             {step > 1 ? (
