@@ -118,7 +118,7 @@ export function DocumentSection({
         <h2
           className={`text-2xl md:text-3xl font-bold ${navy} font-serif mb-4 tracking-tight`}
         >
-          Step 2 of 3: Upload your offering
+          Step 3 of 3: Upload your offering
         </h2>
         <p className="text-slate-600 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
           Your offering is a heartfelt expression of gratitude.
