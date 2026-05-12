@@ -57,7 +57,10 @@ export const users = pgTable("user", {
   countryId: uuid("country_id").notNull(),
   stateId: uuid("state_id").notNull(),
   cityId: uuid("city_id").notNull(),
-  templeId: uuid("temple_id").notNull(),
+  /** Nullable: when the devotee selects "Other" for temple, this is left null and `otherTempleName` holds the proposed name until admin/maintainer approval. */
+  templeId: uuid("temple_id"),
+  /** Free-text temple name supplied when the devotee chose "Other"; cleared once the matching `temple_request` is approved. */
+  otherTempleName: varchar("other_temple_name", { length: 255 }),
 
   initiated: boolean("initiated").default(false).notNull(),
 
@@ -133,6 +136,43 @@ export const adminMedia = pgTable("admin_media", {
   fileName: varchar("file_name", { length: 512 }).notNull(),
   contentType: varchar("content_type", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+/** Devotee-submitted "Other" temple proposals awaiting admin/maintainer review. */
+export const templeRequests = pgTable("temple_request", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+
+  /** Proposed temple name as typed by the devotee. */
+  name: varchar("name", { length: 255 }).notNull(),
+
+  countryId: uuid("country_id").notNull(),
+  stateId: uuid("state_id").notNull(),
+  cityId: uuid("city_id").notNull(),
+
+  status: varchar("status", { length: 32 })
+    .$type<"pending" | "approved" | "rejected">()
+    .notNull()
+    .default("pending"),
+
+  /** On approval: the temple row that was created (or matched) from this request. */
+  approvedTempleId: uuid("approved_temple_id").references(() => temples.id, {
+    onDelete: "set null",
+  }),
+
+  reviewedAt: timestamp("reviewed_at"),
+  reviewerRole: varchar("reviewer_role", { length: 32 }).$type<
+    "admin" | "maintainer" | null
+  >(),
+  reviewerMaintainerId: uuid("reviewer_maintainer_id").references(
+    () => maintainers.id,
+    { onDelete: "set null" },
+  ),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 /** Append-only log of staff edits to offerings. */

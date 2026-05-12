@@ -41,6 +41,8 @@ function profileToFormData(
   user: ExistingUserProfile,
   language: string,
 ): OfferingFormData {
+  /** When the saved profile has no temple but an `otherTempleName`, surface it via the "Other" sentinel so the input pre-fills. */
+  const hasOther = !user.templeId && Boolean(user.otherTempleName);
   return {
     firstName: user.firstName,
     lastName: user.lastName,
@@ -54,7 +56,8 @@ function profileToFormData(
     countryId: user.countryId,
     stateId: user.stateId,
     cityId: user.cityId,
-    templeId: user.templeId,
+    templeId: hasOther ? "0" : user.templeId ?? "",
+    otherTempleName: user.otherTempleName ?? "",
     language,
   };
 }
@@ -74,6 +77,7 @@ function emptyFormExceptEmail(email: string): OfferingFormData {
     stateId: "",
     cityId: "",
     templeId: "",
+    otherTempleName: "",
     language: "English",
   };
 }
@@ -292,6 +296,7 @@ export default function UploadOfferingForm() {
         stateId: "",
         cityId: "",
         templeId: "",
+        otherTempleName: "",
         language: "English",
       });
       setExtractedText("");
@@ -471,6 +476,7 @@ export default function UploadOfferingForm() {
                   />
                   <LocationSection
                     formData={formData}
+                    handleInputChange={handleInputChange}
                     handleSelectChange={handleSelectChange}
                     countries={countries}
                     states={states}

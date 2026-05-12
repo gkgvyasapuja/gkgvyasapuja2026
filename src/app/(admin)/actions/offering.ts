@@ -9,6 +9,7 @@ import {
   users,
   offerings,
   offeringEditLogs,
+  templeRequests,
 } from "@/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import {
@@ -85,7 +86,10 @@ export type ExistingUserProfile = {
   countryId: string;
   stateId: string;
   cityId: string;
-  templeId: string;
+  /** Null when the user previously chose "Other" and the request hasn't been approved yet. */
+  templeId: string | null;
+  /** Free-text temple name from a pending/rejected "Other" request. */
+  otherTempleName: string | null;
   initiated: boolean;
   initiationType: string;
   initiationYear: string;
@@ -123,6 +127,7 @@ export async function checkUserByEmail(
         stateId: row.stateId,
         cityId: row.cityId,
         templeId: row.templeId,
+        otherTempleName: row.otherTempleName,
         initiated: row.initiated,
         initiationType: row.initiationType,
         initiationYear: row.initiationYear,
@@ -145,16 +150,32 @@ export async function submitOffering(fd: FormData) {
   const initiatedRaw = formDataString(fd, "initiated");
   const initiated = initiatedRaw === "true" || initiatedRaw === "on";
 
+  const rawTempleId = formDataString(fd, "templeId");
+  const rawOtherTempleName = formDataString(fd, "otherTempleName").trim();
+  const isOtherTemple = rawTempleId === "0";
+
+  if (isOtherTemple && !rawOtherTempleName) {
+    return {
+      success: false,
+      error: "Please enter the temple or center name for the \"Other\" option.",
+    };
+  }
+
+  const countryId = formDataString(fd, "countryId");
+  const stateId = formDataString(fd, "stateId");
+  const cityId = formDataString(fd, "cityId");
+
   const userValues = {
     firstName: formDataString(fd, "firstName"),
     lastName: formDataString(fd, "lastName"),
     gender: formDataString(fd, "gender") as "male" | "female" | "other",
     email,
     phone: formDataString(fd, "phone"),
-    countryId: formDataString(fd, "countryId"),
-    stateId: formDataString(fd, "stateId"),
-    cityId: formDataString(fd, "cityId"),
-    templeId: formDataString(fd, "templeId"),
+    countryId,
+    stateId,
+    cityId,
+    templeId: isOtherTemple ? null : rawTempleId || null,
+    otherTempleName: isOtherTemple ? rawOtherTempleName : null,
     initiated,
     initiationType: formDataString(fd, "initiationType") || "",
     initiationYear: formDataString(fd, "initiationYear") || "",
@@ -222,6 +243,42 @@ export async function submitOffering(fd: FormData) {
           throw new Error("Failed to create user record.");
         }
         userId = created.id;
+      }
+
+      if (isOtherTemple) {
+        /* Avoid stacking duplicate pending requests for the same user — replace any
+         * still-pending row instead, but preserve historical approved/rejected rows. */
+        const [existingPending] = await tx
+          .select({ id: templeRequests.id })
+          .from(templeRequests)
+          .where(
+            and(
+              eq(templeRequests.userId, userId),
+              eq(templeRequests.status, "pending"),
+            ),
+          )
+          .limit(1);
+
+        if (existingPending) {
+          await tx
+            .update(templeRequests)
+            .set({
+              name: rawOtherTempleName,
+              countryId,
+              stateId,
+              cityId,
+              updatedAt: new Date(),
+            })
+            .where(eq(templeRequests.id, existingPending.id));
+        } else {
+          await tx.insert(templeRequests).values({
+            userId,
+            name: rawOtherTempleName,
+            countryId,
+            stateId,
+            cityId,
+          });
+        }
       }
 
       const [existingOffering] = await tx

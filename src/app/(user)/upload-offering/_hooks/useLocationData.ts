@@ -41,6 +41,7 @@ export function useLocationData(
         stateId: "",
         cityId: "",
         templeId: "",
+        otherTempleName: "",
       }));
       queueMicrotask(() => {
         setCities([]);
@@ -61,7 +62,12 @@ export function useLocationData(
     const stateChanged =
       prevStateId.current !== "" && prevStateId.current !== formData.stateId;
     if (stateChanged) {
-      setFormData((prev) => ({ ...prev, cityId: "", templeId: "" }));
+      setFormData((prev) => ({
+        ...prev,
+        cityId: "",
+        templeId: "",
+        otherTempleName: "",
+      }));
     }
     prevStateId.current = formData.stateId;
   }, [formData.stateId, setFormData]);

@@ -24,6 +24,12 @@ type OfferingRow = Awaited<
   ReturnType<typeof getAdminOfferings>
 >["items"][number];
 
+function templeDisplayName(item: OfferingRow) {
+  if (item.templeName) return item.templeName;
+  if (item.user.otherTempleName) return `Other (${item.user.otherTempleName})`;
+  return "—";
+}
+
 export interface OfferingsListPageProps {
   offerings: OfferingRow[];
   total: number;
@@ -125,7 +131,7 @@ export function OfferingsListPage({
                     {item.cityName ?? "—"}
                   </TableCell>
                   <TableCell className="text-sm text-gray-700 max-w-[160px] truncate">
-                    {item.templeName ?? "—"}
+                    {templeDisplayName(item)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {item.language}

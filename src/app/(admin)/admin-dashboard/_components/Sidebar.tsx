@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Images,
+  ClipboardCheck,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,11 @@ const navItems = [
   { name: "States", href: "/admin-dashboard/states", icon: Map },
   { name: "Cities", href: "/admin-dashboard/cities", icon: MapPin },
   { name: "Temples", href: "/admin-dashboard/temples", icon: Building2 },
+  {
+    name: "Temple Requests",
+    href: "/admin-dashboard/temple-requests",
+    icon: ClipboardCheck,
+  },
   { name: "Books", href: "/admin-dashboard/books", icon: BookOpen },
   { name: "Offerings", href: "/admin-dashboard/offerings", icon: BookOpen },
   { name: "Media", href: "/admin-dashboard/media", icon: Images },

@@ -16,6 +16,7 @@ export function useOfferingForm() {
     stateId: "",
     cityId: "",
     templeId: "",
+    otherTempleName: "",
     language: "English",
   });
 
@@ -36,10 +37,14 @@ export function useOfferingForm() {
   };
 
   const handleSelectChange = (name: string, value: string | null) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value || "",
-    }));
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value || "" };
+      // Clear the free-text temple name whenever the user picks an actual temple (not "Other").
+      if (name === "templeId" && value !== "0") {
+        next.otherTempleName = "";
+      }
+      return next;
+    });
   };
 
   return { formData, setFormData, handleInputChange, handleSelectChange };

@@ -6,11 +6,15 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { OfferingFormData, LocationItem } from "./types";
 import { FormField } from "./FormField";
 
 interface Props {
   formData: OfferingFormData;
+  handleInputChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
   handleSelectChange: (name: string, value: string) => void;
   countries: LocationItem[];
   states: LocationItem[];
@@ -20,13 +24,15 @@ interface Props {
 
 export function LocationSection({
   formData,
+  handleInputChange,
   handleSelectChange,
   countries,
   states,
   cities,
   temples,
 }: Props) {
-  console.log({ formData });
+  const isOtherTemple = formData.templeId === "0";
+
   return (
     <section>
       <div className="flex items-center gap-2 mb-6">
@@ -167,6 +173,28 @@ export function LocationSection({
             </SelectContent>
           </Select>
         </FormField>
+
+        {isOtherTemple && (
+          <FormField
+            label="Temple / Center Name"
+            subLabel="मंदिर / केंद्र का नाम"
+            required
+            className="space-y-3 md:col-span-2"
+          >
+            <Input
+              name="otherTempleName"
+              value={formData.otherTempleName}
+              onChange={handleInputChange}
+              placeholder="Enter the temple or center name"
+              maxLength={255}
+              className="h-11 px-5 bg-slate-50 border border-slate-200 text-slate-700 placeholder:text-slate-400 focus-visible:ring-2 focus-visible:ring-amber-400/20 rounded-xl text-[15px] transition-all"
+            />
+            <p className="text-xs text-slate-500">
+              We&apos;ll send this to our team for review. Once approved, your
+              profile will be linked to the new temple automatically.
+            </p>
+          </FormField>
+        )}
       </div>
     </section>
   );

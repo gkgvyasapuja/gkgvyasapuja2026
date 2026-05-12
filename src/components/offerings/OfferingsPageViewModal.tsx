@@ -41,6 +41,12 @@ function formatDate(value: OfferingPageItem["createdAt"]) {
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString();
 }
 
+function templeDisplayName(item: OfferingPageItem) {
+  if (item.templeName) return item.templeName;
+  if (item.user.otherTempleName) return `Other (${item.user.otherTempleName})`;
+  return null;
+}
+
 function OfferingBlock({ item }: { item: OfferingPageItem }) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -54,7 +60,7 @@ function OfferingBlock({ item }: { item: OfferingPageItem }) {
     item.countryName,
     item.stateName,
     item.cityName,
-    item.templeName,
+    templeDisplayName(item),
   ]
     .filter(Boolean)
     .join(" · ");

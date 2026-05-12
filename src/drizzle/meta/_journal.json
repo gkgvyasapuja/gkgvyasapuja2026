@@ -43,6 +43,13 @@
       "when": 1776092240599,
       "tag": "0005_admin_media",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778552143538,
+      "tag": "0006_temple_requests_and_other_temple",
+      "breakpoints": true
     }
   ]
 }

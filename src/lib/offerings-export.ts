@@ -28,6 +28,9 @@ export function stripHtmlForExport(html: string): string {
 }
 
 export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
+  const templeName = (r: AdminOfferingExportRow) =>
+    r.templeName ?? (r.user.otherTempleName ? `Other (${r.user.otherTempleName})` : "");
+
   const data = rows.map((r) => ({
     Devotee: `${r.user.firstName} ${r.user.lastName}`.trim(),
     "Initiated Name": r.user.initiatedName || "",
@@ -36,7 +39,7 @@ export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
     Country: r.countryName ?? "",
     State: r.stateName ?? "",
     City: r.cityName ?? "",
-    Temple: r.templeName ?? "",
+    Temple: templeName(r),
     Language: r.language,
     "Staff edited": hasStaffEdit(r) ? "Yes" : "No",
     "Last edited by": staffEditorLabel(r) ?? "",
@@ -62,7 +65,10 @@ export async function buildOfferingsDocxBuffer(rows: AdminOfferingExportRow[]) {
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
     const name = `${r.user.firstName} ${r.user.lastName}`.trim();
-    const location = [r.countryName, r.stateName, r.cityName, r.templeName]
+    const displayTemple =
+      r.templeName ??
+      (r.user.otherTempleName ? `Other (${r.user.otherTempleName})` : null);
+    const location = [r.countryName, r.stateName, r.cityName, displayTemple]
       .filter(Boolean)
       .join(" · ");
 

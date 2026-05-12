@@ -12,7 +12,10 @@ export interface OfferingFormData {
   countryId: string;
   stateId: string;
   cityId: string;
+  /** A real temple UUID, or the sentinel "0" when the devotee chose "Other". */
   templeId: string;
+  /** Free-text temple name supplied when `templeId === "0"`. */
+  otherTempleName: string;
   language: string;
 }
 

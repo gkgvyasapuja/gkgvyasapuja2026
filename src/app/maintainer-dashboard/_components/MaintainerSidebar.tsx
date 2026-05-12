@@ -4,10 +4,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardCheck,
+} from "lucide-react";
 
 const navItems = [
   { name: "Offerings", href: "/maintainer-dashboard/offerings", icon: BookOpen },
+  {
+    name: "Temple Requests",
+    href: "/maintainer-dashboard/temple-requests",
+    icon: ClipboardCheck,
+  },
 ];
 
 export function MaintainerSidebar() {

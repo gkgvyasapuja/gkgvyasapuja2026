@@ -55,6 +55,12 @@ export function useSubmitOffering(
       );
       return false;
     }
+    if (formData.templeId === "0" && !formData.otherTempleName.trim()) {
+      setError(
+        "Please enter the temple or center name for the \"Other\" option.",
+      );
+      return false;
+    }
     setError(null);
     return true;
   };
@@ -102,6 +108,7 @@ export function useSubmitOffering(
     fd.append("stateId", formData.stateId);
     fd.append("cityId", formData.cityId);
     fd.append("templeId", formData.templeId);
+    fd.append("otherTempleName", formData.otherTempleName.trim());
     fd.append("initiated", String(formData.initiated));
     fd.append("initiationType", formData.initiationType);
     fd.append("initiationYear", formData.initiationYear);
