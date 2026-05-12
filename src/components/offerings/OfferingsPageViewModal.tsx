@@ -8,6 +8,7 @@ import {
   hasStaffEdit,
   staffEditorLabel,
   formatStaffEditedAt,
+  offeringHasImages,
 } from "@/lib/offering-staff-edit";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Edit2, FileDown, Layers } from "lucide-react";
+import { Edit2, FileDown, ImageIcon, Layers } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const QuillEditor = dynamic(
@@ -90,6 +91,7 @@ function OfferingBlock({ item }: { item: OfferingPageItem }) {
 
   const staffEdited = hasStaffEdit(item);
   const editor = staffEditorLabel(item);
+  const withImages = offeringHasImages(item.offering);
 
   return (
     <section
@@ -129,6 +131,12 @@ function OfferingBlock({ item }: { item: OfferingPageItem }) {
               ? ` — ${editor} (${formatStaffEditedAt(item.lastEditedAt)})`
               : null}
           </p>
+          {withImages && (
+            <p className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800 w-fit">
+              <ImageIcon className="h-3 w-3" aria-hidden />
+              Contains images
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {item.documentUrl && (

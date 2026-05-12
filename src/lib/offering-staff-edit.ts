@@ -23,3 +23,10 @@ export function formatStaffEditedAt(
   const d = value instanceof Date ? value : new Date(value);
   return Number.isNaN(d.getTime()) ? "—" : d.toLocaleString();
 }
+
+/** True when the saved offering HTML contains embedded image markup.
+ * Mammoth inlines images as `<img src="data:...">`, so a tag match is reliable. */
+export function offeringHasImages(html: string | null | undefined): boolean {
+  if (!html) return false;
+  return /<img\b/i.test(html);
+}

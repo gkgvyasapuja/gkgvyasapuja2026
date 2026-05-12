@@ -8,6 +8,7 @@ import { OfferingsPageViewModal } from "@/components/offerings/OfferingsPageView
 import { OfferingsPagination } from "@/components/offerings/OfferingsPagination";
 import {
   hasStaffEdit,
+  offeringHasImages,
   staffEditorLabel,
 } from "@/lib/offering-staff-edit";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileDown } from "lucide-react";
+import { FileDown, ImageIcon } from "lucide-react";
 
 type OfferingRow = Awaited<
   ReturnType<typeof getAdminOfferings>
@@ -95,6 +96,7 @@ export function OfferingsListPage({
                 <TableHead>Temple</TableHead>
                 <TableHead>Language</TableHead>
                 <TableHead className="whitespace-nowrap">Staff edited</TableHead>
+                <TableHead className="whitespace-nowrap">Images</TableHead>
                 <TableHead className="min-w-[200px]">Offering</TableHead>
                 <TableHead className="whitespace-nowrap">Document</TableHead>
                 <TableHead>Date</TableHead>
@@ -104,6 +106,7 @@ export function OfferingsListPage({
               {offerings.map((item) => {
                 const edited = hasStaffEdit(item);
                 const editor = staffEditorLabel(item);
+                const withImages = offeringHasImages(item.offering);
                 return (
                 <TableRow
                   key={item.id}
@@ -155,6 +158,19 @@ export function OfferingsListPage({
                       ) : null}
                     </div>
                   </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {withImages ? (
+                      <span
+                        className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800"
+                        title="This offering contains embedded images"
+                      >
+                        <ImageIcon className="h-3 w-3" aria-hidden />
+                        Yes
+                      </span>
+                    ) : (
+                      <span className="text-xs text-gray-500">No</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <ViewEditOfferingModal
                       offering={{
@@ -193,7 +209,7 @@ export function OfferingsListPage({
               {offerings.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={13}
+                    colSpan={14}
                     className="h-24 text-center text-gray-500"
                   >
                     No offerings found for the selected filters.

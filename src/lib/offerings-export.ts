@@ -3,6 +3,7 @@ import {
   hasStaffEdit,
   staffEditorLabel,
   formatStaffEditedAt,
+  offeringHasImages,
 } from "@/lib/offering-staff-edit";
 import {
   Document,
@@ -44,6 +45,7 @@ export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
     "Staff edited": hasStaffEdit(r) ? "Yes" : "No",
     "Last edited by": staffEditorLabel(r) ?? "",
     "Last edited at": formatStaffEditedAt(r.lastEditedAt),
+    "Has images": offeringHasImages(r.offering) ? "Yes" : "No",
     Offering: stripHtmlForExport(r.offering),
     Date: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "",
   }));
@@ -93,6 +95,13 @@ export async function buildOfferingsDocxBuffer(rows: AdminOfferingExportRow[]) {
         text: hasStaffEdit(r)
           ? `Staff edited: Yes — ${staffEditorLabel(r)} (${formatStaffEditedAt(r.lastEditedAt)})`
           : "Staff edited: No",
+      }),
+    );
+    children.push(
+      new Paragraph({
+        text: offeringHasImages(r.offering)
+          ? "Contains images: Yes"
+          : "Contains images: No",
       }),
     );
 
