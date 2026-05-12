@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { FileDown } from "lucide-react";
 
 type OfferingRow = Awaited<
   ReturnType<typeof getAdminOfferings>
@@ -95,6 +96,7 @@ export function OfferingsListPage({
                 <TableHead>Language</TableHead>
                 <TableHead className="whitespace-nowrap">Staff edited</TableHead>
                 <TableHead className="min-w-[200px]">Offering</TableHead>
+                <TableHead className="whitespace-nowrap">Document</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
             </TableHeader>
@@ -159,9 +161,26 @@ export function OfferingsListPage({
                         id: item.id,
                         offering: item.offering,
                         language: item.language,
+                        documentUrl: item.documentUrl,
                         userParams: `${item.user.firstName} ${item.user.lastName} - ${item.year}`,
                       }}
                     />
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {item.documentUrl ? (
+                      <a
+                        href={item.documentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 hover:underline text-sm"
+                        title="Download original .docx"
+                      >
+                        <FileDown className="h-3.5 w-3.5" aria-hidden />
+                        Download
+                      </a>
+                    ) : (
+                      <span className="text-sm text-gray-400">—</span>
+                    )}
                   </TableCell>
                   <TableCell className="text-sm whitespace-nowrap">
                     {item.createdAt
@@ -174,7 +193,7 @@ export function OfferingsListPage({
               {offerings.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={12}
+                    colSpan={13}
                     className="h-24 text-center text-gray-500"
                   >
                     No offerings found for the selected filters.

@@ -15,7 +15,7 @@ import {
 // import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { editOffering } from "@/app/(admin)/actions/admin";
-import { Eye, Edit2 } from "lucide-react";
+import { Eye, Edit2, FileDown } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const QuillEditor = dynamic(
@@ -33,6 +33,8 @@ interface ViewEditOfferingModalProps {
     id: string;
     offering: string;
     language: "Hindi" | "English";
+    /** Public URL to the original uploaded .docx (null when missing/legacy). */
+    documentUrl: string | null;
     userParams: string; // E.g., Devotee Name - Year
   };
 }
@@ -97,18 +99,32 @@ export function ViewEditOfferingModal({
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-175 max-h-[80vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex flex-row justify-between items-center mr-6">
+        <DialogHeader className="flex flex-row justify-between items-center mr-6 gap-2">
           <DialogTitle>Offering by {offering.userParams}</DialogTitle>
-          {!isEditing && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-              className="flex items-center gap-2"
-            >
-              <Edit2 className="w-4 h-4" /> Edit
-            </Button>
-          )}
+          <div className="flex items-center gap-2">
+            {offering.documentUrl && (
+              <a
+                href={offering.documentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-muted hover:text-indigo-700 transition-colors"
+                title="Open the original uploaded document"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                Download .docx
+              </a>
+            )}
+            {!isEditing && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="flex items-center gap-2"
+              >
+                <Edit2 className="w-4 h-4" /> Edit
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto py-4">
@@ -121,7 +137,7 @@ export function ViewEditOfferingModal({
                 <span className="font-medium text-gray-900">{language}</span>
               </div>
               <div
-                className="bg-gray-50 p-6 rounded-lg border border-gray-100 prose prose-sm max-w-none text-gray-800"
+                className="bg-gray-50 p-6 rounded-lg border border-gray-100 prose prose-sm max-w-none text-gray-800 wrap-anywhere overflow-x-auto **:max-w-full [&_img]:h-auto [&_pre]:whitespace-pre-wrap [&_pre]:wrap-break-word [&_table]:block [&_table]:overflow-x-auto"
                 dangerouslySetInnerHTML={{ __html: textContent }}
               />
             </div>

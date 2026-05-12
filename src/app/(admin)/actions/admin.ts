@@ -192,9 +192,18 @@ export async function searchTemples(
   const base = db
     .select({ id: temples.id, name: temples.name })
     .from(temples);
+
+  /* Temples scope to the most specific selection: if a city is provided,
+   * filter to that city; otherwise fall back to the state. We avoid AND-ing
+   * both so a temple row with a stale `state_id` isn't silently excluded
+   * when the user picks the same city. */
   const conds = [];
-  if (options?.cityId) conds.push(eq(temples.cityId, options.cityId));
-  if (options?.stateId) conds.push(eq(temples.stateId, options.stateId));
+  if (options?.cityId) {
+    conds.push(eq(temples.cityId, options.cityId));
+  } else if (options?.stateId) {
+    conds.push(eq(temples.stateId, options.stateId));
+  }
+
   if (safe.length === 0) {
     const whereClause = conds.length > 0 ? and(...conds) : undefined;
     const q = whereClause ? base.where(whereClause) : base;
@@ -640,6 +649,7 @@ export async function getAdminOfferings(filters?: {
       year: offerings.year,
       offering: offerings.offering,
       language: offerings.language,
+      documentUrl: offerings.documentUrl,
       createdAt: offerings.createdAt,
       user: {
         id: users.id,
@@ -716,6 +726,7 @@ export async function getAdminOfferingsForExport(filters?: {
       year: offerings.year,
       offering: offerings.offering,
       language: offerings.language,
+      documentUrl: offerings.documentUrl,
       createdAt: offerings.createdAt,
       user: {
         id: users.id,

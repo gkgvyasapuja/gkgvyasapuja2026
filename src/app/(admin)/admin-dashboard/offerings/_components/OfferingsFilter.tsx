@@ -72,12 +72,15 @@ export function OfferingsFilter({
     [initialSelections.country?.id, initialSelections.state?.id],
   );
 
+  /** Temple list follows the most specific selection: city if picked, otherwise state. */
   const searchTemplesCb = useCallback(
     (q: string) =>
-      searchTemples(q, {
-        cityId: initialSelections.city?.id,
-        stateId: initialSelections.state?.id,
-      }),
+      searchTemples(
+        q,
+        initialSelections.city?.id
+          ? { cityId: initialSelections.city.id }
+          : { stateId: initialSelections.state?.id },
+      ),
     [initialSelections.city?.id, initialSelections.state?.id],
   );
 
@@ -173,16 +176,16 @@ export function OfferingsFilter({
           id="offerings-temple"
           label="Temple"
           placeholder={
-            initialSelections.state || initialSelections.city
-              ? "Search temple…"
-              : "Select state or city first"
+            initialSelections.state || initialSelections.temple
+              ? initialSelections.city
+                ? "Search temple in city…"
+                : "Search temple in state…"
+              : "Select a state first"
           }
           search={searchTemplesCb}
           value={initialSelections.temple}
           disabled={
-            !initialSelections.state &&
-            !initialSelections.city &&
-            !initialSelections.temple
+            !initialSelections.state && !initialSelections.temple
           }
           emptyMessage="No temples found"
           onChange={(item) => {
