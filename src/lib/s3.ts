@@ -44,16 +44,48 @@ export function objectKeyFromPublicUrl(url: string): string | null {
   }
 }
 
+function sanitizeOfferingFileSegment(value: string): string {
+  return value
+    .trim()
+    .replace(/[^\w.\-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
+}
+
+/** Offering object name: firstName_lastName_mobile_state_city_temple.docx */
+export function buildOfferingDocxFileName(params: {
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  state: string;
+  city: string;
+  temple: string;
+}): string {
+  const parts = [
+    params.firstName,
+    params.lastName,
+    params.mobile,
+    params.state,
+    params.city,
+    params.temple,
+  ]
+    .map(sanitizeOfferingFileSegment)
+    .filter(Boolean);
+
+  const base = parts.join("_") || "offering";
+  return `${base.slice(0, 200)}.docx`;
+}
+
 export async function uploadOfferingDocx(params: {
   year: string;
   buffer: Buffer;
-  originalFileName: string;
+  fileName: string;
 }): Promise<{ key: string; url: string }> {
   const { client, bucket } = requireConfig();
-  const safeBase = params.originalFileName
+  const safeName = params.fileName
     .replace(/[^\w.\-]+/g, "_")
-    .slice(0, 120);
-  const key = `offerings/${params.year}/${randomUUID()}-${safeBase}`;
+    .slice(0, 220);
+  const key = `offerings/${params.year}/${safeName}`;
 
   await client.send(
     new PutObjectCommand({

@@ -13,6 +13,7 @@ import {
 } from "@/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import {
+  buildOfferingDocxFileName,
   deleteObjectByKey,
   deleteObjectByUrl,
   uploadOfferingDocx,
@@ -198,13 +199,43 @@ export async function submitOffering(fd: FormData) {
     return { success: false, error: "Could not read the uploaded file." };
   }
 
+  const [[stateRow], [cityRow], templeRow] = await Promise.all([
+    db
+      .select({ name: states.name })
+      .from(states)
+      .where(eq(states.id, stateId))
+      .limit(1),
+    db
+      .select({ name: cities.name })
+      .from(cities)
+      .where(eq(cities.id, cityId))
+      .limit(1),
+    isOtherTemple || !rawTempleId
+      ? Promise.resolve(undefined)
+      : db
+          .select({ name: temples.name })
+          .from(temples)
+          .where(eq(temples.id, rawTempleId))
+          .limit(1)
+          .then((rows) => rows[0]),
+  ]);
+
+  const offeringFileName = buildOfferingDocxFileName({
+    firstName: userValues.firstName,
+    lastName: userValues.lastName,
+    mobile: userValues.phone,
+    state: stateRow?.name ?? "",
+    city: cityRow?.name ?? "",
+    temple: isOtherTemple ? rawOtherTempleName : (templeRow?.name ?? ""),
+  });
+
   let uploadKey: string;
   let documentUrl: string;
   try {
     const uploaded = await uploadOfferingDocx({
       year,
       buffer,
-      originalFileName: file.name,
+      fileName: offeringFileName,
     });
     uploadKey = uploaded.key;
     documentUrl = uploaded.url;
