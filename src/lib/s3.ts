@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
@@ -143,6 +144,18 @@ export async function uploadAdminMediaFile(params: {
   );
 
   return { key, url: publicObjectUrl(key) };
+}
+
+export async function getObjectBuffer(key: string): Promise<Buffer> {
+  const { client, bucket } = requireConfig();
+  const response = await client.send(
+    new GetObjectCommand({ Bucket: bucket, Key: key }),
+  );
+  if (!response.Body) {
+    throw new Error(`Empty S3 object: ${key}`);
+  }
+  const bytes = await response.Body.transformToByteArray();
+  return Buffer.from(bytes);
 }
 
 export async function deleteObjectByUrl(url: string): Promise<void> {

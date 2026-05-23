@@ -4,6 +4,7 @@ import { getAdminOfferingsForExport } from "@/app/(admin)/actions/admin";
 import {
   buildOfferingsDocxBuffer,
   buildOfferingsXlsxBuffer,
+  buildOfferingsZipBuffer,
 } from "@/lib/offerings-export";
 
 export const runtime = "nodejs";
@@ -35,14 +36,34 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const format = searchParams.get("format");
-  if (format !== "xlsx" && format !== "docx") {
+  if (format !== "xlsx" && format !== "docx" && format !== "zip") {
     return NextResponse.json(
-      { error: "Invalid or missing format. Use format=xlsx or format=docx." },
+      {
+        error:
+          "Invalid or missing format. Use format=xlsx, format=docx, or format=zip.",
+      },
       { status: 400 },
     );
   }
 
   const rows = await getAdminOfferingsForExport(parseFilters(searchParams));
+
+  if (format === "zip") {
+    const buffer = await buildOfferingsZipBuffer(rows);
+    if (!buffer) {
+      return NextResponse.json(
+        { error: "No uploaded documents found for the selected filters." },
+        { status: 404 },
+      );
+    }
+    return new NextResponse(new Uint8Array(buffer), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/zip",
+        "Content-Disposition": `attachment; filename="${filenameStem()}.zip"`,
+      },
+    });
+  }
 
   if (format === "xlsx") {
     const buffer = buildOfferingsXlsxBuffer(rows);

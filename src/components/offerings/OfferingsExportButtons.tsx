@@ -3,9 +3,12 @@
 import { useSearchParams } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileArchive, FileSpreadsheet, FileText } from "lucide-react";
 
-function exportHref(searchParams: URLSearchParams, format: "xlsx" | "docx") {
+function exportHref(
+  searchParams: URLSearchParams,
+  format: "xlsx" | "docx" | "zip",
+) {
   const p = new URLSearchParams(searchParams.toString());
   p.set("format", format);
   return `/api/offerings/export?${p.toString()}`;
@@ -28,6 +31,10 @@ export function OfferingsExportButtons() {
       <a href={exportHref(searchParams, "docx")} className={linkClass}>
         <FileText className="h-4 w-4 mr-1.5" aria-hidden />
         Export Word (combined)
+      </a>
+      <a href={exportHref(searchParams, "zip")} className={linkClass}>
+        <FileArchive className="h-4 w-4 mr-1.5" aria-hidden />
+        Download documents (ZIP)
       </a>
     </div>
   );

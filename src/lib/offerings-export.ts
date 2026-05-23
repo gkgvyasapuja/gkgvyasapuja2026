@@ -5,12 +5,14 @@ import {
   formatStaffEditedAt,
   offeringHasImages,
 } from "@/lib/offering-staff-edit";
+import { getObjectBuffer, objectKeyFromPublicUrl } from "@/lib/s3";
 import {
   Document,
   HeadingLevel,
   Packer,
   Paragraph,
 } from "docx";
+import JSZip from "jszip";
 import * as XLSX from "xlsx";
 
 export function stripHtmlForExport(html: string): string {
@@ -36,6 +38,67 @@ function offeringFileName(documentUrl: string | null): string {
   } catch {
     return "";
   }
+}
+
+function uniqueZipEntryName(baseName: string, used: Set<string>): string {
+  if (!used.has(baseName)) {
+    used.add(baseName);
+    return baseName;
+  }
+  const dot = baseName.lastIndexOf(".");
+  const stem = dot > 0 ? baseName.slice(0, dot) : baseName;
+  const ext = dot > 0 ? baseName.slice(dot) : "";
+  let n = 2;
+  while (used.has(`${stem}_${n}${ext}`)) n += 1;
+  const unique = `${stem}_${n}${ext}`;
+  used.add(unique);
+  return unique;
+}
+
+export async function buildOfferingsZipBuffer(
+  rows: AdminOfferingExportRow[],
+): Promise<Buffer | null> {
+  const zip = new JSZip();
+  const usedNames = new Set<string>();
+  const entries: { entryName: string; key: string }[] = [];
+
+  for (const row of rows) {
+    const documentUrl = row.documentUrl;
+    if (!documentUrl) continue;
+
+    const key = objectKeyFromPublicUrl(documentUrl);
+    if (!key) continue;
+
+    const baseName =
+      offeringFileName(documentUrl) || `offering_${row.id}.docx`;
+    entries.push({
+      entryName: uniqueZipEntryName(baseName, usedNames),
+      key,
+    });
+  }
+
+  if (entries.length === 0) return null;
+
+  let added = 0;
+  await Promise.all(
+    entries.map(async ({ entryName, key }) => {
+      try {
+        const buffer = await getObjectBuffer(key);
+        zip.file(entryName, buffer);
+        added += 1;
+      } catch (err) {
+        console.error(`Failed to fetch offering document ${key}:`, err);
+      }
+    }),
+  );
+
+  if (added === 0) return null;
+
+  return zip.generateAsync({
+    type: "nodebuffer",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 },
+  });
 }
 
 export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
