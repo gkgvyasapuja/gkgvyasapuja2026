@@ -28,6 +28,16 @@ export function stripHtmlForExport(html: string): string {
     .trim();
 }
 
+function offeringFileName(documentUrl: string | null): string {
+  if (!documentUrl) return "";
+  try {
+    const segment = new URL(documentUrl).pathname.split("/").pop();
+    return segment ? decodeURIComponent(segment) : "";
+  } catch {
+    return "";
+  }
+}
+
 export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
   const templeName = (r: AdminOfferingExportRow) =>
     r.templeName ?? (r.user.otherTempleName ? `Other (${r.user.otherTempleName})` : "");
@@ -41,12 +51,12 @@ export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
     State: r.stateName ?? "",
     City: r.cityName ?? "",
     Temple: templeName(r),
+    "File name": offeringFileName(r.documentUrl),
     Language: r.language,
     "Staff edited": hasStaffEdit(r) ? "Yes" : "No",
     "Last edited by": staffEditorLabel(r) ?? "",
     "Last edited at": formatStaffEditedAt(r.lastEditedAt),
     "Has images": offeringHasImages(r.offering) ? "Yes" : "No",
-    Offering: stripHtmlForExport(r.offering),
     Date: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "",
   }));
   const ws = XLSX.utils.json_to_sheet(data);
