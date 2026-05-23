@@ -17,6 +17,9 @@
     "db:seed:temples": "tsx src/scripts/seed-temples.ts",
     "db:dedupe:temples": "tsx src/scripts/dedupe-temples-by-name.ts",
     "db:seed:books": "tsx src/scripts/seed-books.ts",
+    "db:backup": "./scripts/backup-db.sh",
+    "db:backup:s3": "tsx scripts/backup-db-to-s3.ts",
+    "db:backup:install-cron": "./scripts/install-backup-cron.sh",
     "studio": "npx drizzle-kit studio"
   },
   "dependencies": {
