@@ -31,22 +31,22 @@ export default function MaintainerLoginPage() {
             Maintainer Login
           </h1>
           <p className="text-sm text-gray-500 font-light">
-            Sign in with the maintainer ID and password issued by an admin.
+            Sign in with the email and password provided by an admin.
           </p>
         </div>
 
         <form action={formAction} className="space-y-6">
           <div className="text-left space-y-2">
-            <Label htmlFor="loginId" className="text-[#0a2540] font-medium">
-              Maintainer ID
+            <Label htmlFor="email" className="text-[#0a2540] font-medium">
+              Email
             </Label>
             <Input
-              id="loginId"
-              name="loginId"
-              type="text"
+              id="email"
+              name="email"
+              type="email"
               required
               autoComplete="username"
-              placeholder="e.g. mtr_abc123xyz"
+              placeholder="maintainer@example.com"
               className="w-full rounded-xl border-gray-200 focus-visible:ring-[#ff6b4a] py-6 px-4"
             />
           </div>

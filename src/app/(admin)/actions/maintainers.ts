@@ -4,20 +4,28 @@ import { db } from "@/db";
 import { maintainers } from "@/db/schema";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { getAdminSession } from "@/lib/auth";
-import {
-  generateMaintainerLoginId,
-  generateMaintainerPassword,
-  hashPassword,
-  verifyPassword,
-} from "@/lib/password";
+import { hashPassword, verifyPassword } from "@/lib/password";
 
 async function requireAdminForMaintainerActions() {
   if (!(await getAdminSession())) {
     redirect("/admin");
   }
+}
+
+function normalizeMaintainerEmail(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const email = raw.trim().toLowerCase();
+  if (!email || email.length > 64) return null;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+  return email;
+}
+
+function validateMaintainerPassword(raw: unknown): string | null {
+  if (typeof raw !== "string" || raw.length < 8) return null;
+  return raw;
 }
 
 export async function getMaintainersList() {
@@ -45,32 +53,45 @@ export async function createMaintainer(
       ? labelRaw.trim()
       : null;
 
-  let loginId = "";
-  let password = "";
-  for (let attempt = 0; attempt < 8; attempt++) {
-    loginId = generateMaintainerLoginId();
-    password = generateMaintainerPassword(16);
-    const passwordHash = hashPassword(password);
-    try {
-      await db.insert(maintainers).values({
-        loginId,
-        passwordHash,
-        label,
-      });
-      revalidatePath("/admin-dashboard/maintainers");
-      return {
-        success: true as const,
-        loginId,
-        password,
-      };
-    } catch {
-      continue;
-    }
+  const email = normalizeMaintainerEmail(formData.get("email"));
+  if (!email) {
+    return {
+      success: false as const,
+      error: "Please enter a valid email address.",
+    };
   }
-  return {
-    success: false as const,
-    error: "Could not generate a unique login id. Try again.",
-  };
+
+  const password = validateMaintainerPassword(formData.get("password"));
+  if (!password) {
+    return {
+      success: false as const,
+      error: "Password must be at least 8 characters.",
+    };
+  }
+
+  const passwordHash = hashPassword(password);
+
+  try {
+    await db.insert(maintainers).values({
+      loginId: email,
+      passwordHash,
+      label,
+    });
+    revalidatePath("/admin-dashboard/maintainers");
+    return { success: true as const };
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "";
+    if (message.includes("unique") || message.includes("duplicate")) {
+      return {
+        success: false as const,
+        error: "A maintainer with this email already exists.",
+      };
+    }
+    return {
+      success: false as const,
+      error: "Could not create maintainer. Try again.",
+    };
+  }
 }
 
 export async function updateMaintainer(
@@ -90,12 +111,20 @@ export async function updateMaintainer(
       ? labelRaw.trim()
       : null;
 
-  const regenerate =
-    formData.get("regeneratePassword") === "true" ||
-    formData.get("regeneratePassword") === "on";
+  const passwordRaw = formData.get("password");
+  const password =
+    typeof passwordRaw === "string" && passwordRaw.length > 0
+      ? passwordRaw
+      : null;
 
-  if (regenerate) {
-    const password = generateMaintainerPassword(16);
+  if (password !== null && password.length < 8) {
+    return {
+      success: false as const,
+      error: "Password must be at least 8 characters.",
+    };
+  }
+
+  if (password) {
     const passwordHash = hashPassword(password);
     await db
       .update(maintainers)
@@ -106,7 +135,7 @@ export async function updateMaintainer(
       })
       .where(eq(maintainers.id, id));
     revalidatePath("/admin-dashboard/maintainers");
-    return { success: true as const, newPassword: password };
+    return { success: true as const };
   }
 
   await db
@@ -133,17 +162,17 @@ export async function deleteMaintainer(id: string) {
 }
 
 export async function loginMaintainer(prevState: unknown, formData: FormData) {
-  const loginId = formData.get("loginId");
+  const email = normalizeMaintainerEmail(formData.get("email"));
   const password = formData.get("password");
 
-  if (typeof loginId !== "string" || typeof password !== "string") {
+  if (!email || typeof password !== "string") {
     return { error: "Invalid credentials" };
   }
 
   const rows = await db
     .select()
     .from(maintainers)
-    .where(eq(maintainers.loginId, loginId.trim()))
+    .where(sql`lower(${maintainers.loginId}) = ${email}`)
     .limit(1);
 
   const row = rows[0];

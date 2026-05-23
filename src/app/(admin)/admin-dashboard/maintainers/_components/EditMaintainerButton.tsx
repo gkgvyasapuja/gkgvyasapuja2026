@@ -25,13 +25,11 @@ export function EditMaintainerButton({ row }: { row: MaintainerRow }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [newPassword, setNewPassword] = useState<string | null>(null);
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (!next) {
       setError(null);
-      setNewPassword(null);
     }
   }
 
@@ -42,11 +40,7 @@ export function EditMaintainerButton({ row }: { row: MaintainerRow }) {
     startTransition(async () => {
       const res = await updateMaintainer(null, fd);
       if (res.success) {
-        if ("newPassword" in res && res.newPassword) {
-          setNewPassword(res.newPassword);
-        } else {
-          handleOpenChange(false);
-        }
+        handleOpenChange(false);
         router.refresh();
       } else {
         setError(res.error ?? "Update failed.");
@@ -68,81 +62,51 @@ export function EditMaintainerButton({ row }: { row: MaintainerRow }) {
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              {newPassword ? "New password" : "Edit maintainer"}
-            </DialogTitle>
+            <DialogTitle>Edit maintainer</DialogTitle>
           </DialogHeader>
 
-          {newPassword ? (
-            <div className="space-y-3 text-sm">
-              <p className="text-gray-600">
-                A new password was generated. Copy it now; it will not be shown
-                again.
-              </p>
-              <div>
-                <Label>Password</Label>
-                <p className="mt-1 font-mono rounded-md bg-gray-50 px-3 py-2 border break-all">
-                  {newPassword}
-                </p>
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input type="hidden" name="id" value={row.id} />
+            <div className="space-y-1 text-sm">
+              <span className="text-gray-500">Email</span>
+              <p className="font-mono text-gray-900">{row.loginId}</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`label-${row.id}`}>Label (optional)</Label>
+              <Input
+                id={`label-${row.id}`}
+                name="label"
+                defaultValue={row.label ?? ""}
+                placeholder="e.g. Temple coordinator"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`password-${row.id}`}>
+                New password (optional)
+              </Label>
+              <Input
+                id={`password-${row.id}`}
+                name="password"
+                type="password"
+                minLength={8}
+                autoComplete="new-password"
+                placeholder="Leave blank to keep current password"
+              />
+            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
-                onClick={() => {
-                  void navigator.clipboard.writeText(newPassword);
-                }}
-              >
-                Copy password
-              </Button>
-              <Button
-                type="button"
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
                 onClick={() => handleOpenChange(false)}
               >
-                Done
+                Cancel
+              </Button>
+              <Button type="submit" disabled={pending}>
+                {pending ? "Saving..." : "Save"}
               </Button>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input type="hidden" name="id" value={row.id} />
-              <div className="space-y-1 text-sm">
-                <span className="text-gray-500">Login ID</span>
-                <p className="font-mono text-gray-900">{row.loginId}</p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`label-${row.id}`}>Label (optional)</Label>
-                <Input
-                  id={`label-${row.id}`}
-                  name="label"
-                  defaultValue={row.label ?? ""}
-                  placeholder="e.g. Temple coordinator"
-                />
-              </div>
-              <label className="flex items-center gap-2 text-sm text-gray-700">
-                <input
-                  type="checkbox"
-                  name="regeneratePassword"
-                  value="on"
-                  className="rounded border-gray-300"
-                />
-                Regenerate password
-              </label>
-              {error && <p className="text-sm text-red-600">{error}</p>}
-              <div className="flex justify-end gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={pending}>
-                  {pending ? "Saving..." : "Save"}
-                </Button>
-              </div>
-            </form>
-          )}
+          </form>
         </DialogContent>
       </Dialog>
     </>

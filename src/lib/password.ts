@@ -18,23 +18,3 @@ export function verifyPassword(plain: string, stored: string): boolean {
   const hash = scryptSync(plain, salt, KEY_LEN);
   return timingSafeEqual(hash, expected);
 }
-
-const LOGIN_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789";
-
-export function generateMaintainerLoginId(): string {
-  const bytes = randomBytes(12);
-  let suffix = "";
-  for (let i = 0; i < 10; i++) {
-    suffix += LOGIN_CHARS[bytes[i]! % LOGIN_CHARS.length]!;
-  }
-  return `mtr_${suffix}`;
-}
-
-export function generateMaintainerPassword(length = 16): string {
-  const bytes = randomBytes(length);
-  let s = "";
-  for (let i = 0; i < length; i++) {
-    s += LOGIN_CHARS[bytes[i]! % LOGIN_CHARS.length]!;
-  }
-  return s;
-}

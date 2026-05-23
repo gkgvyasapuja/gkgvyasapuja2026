@@ -25,16 +25,15 @@ export default async function ManageMaintainersPage() {
 
       <p className="text-sm text-gray-600 max-w-2xl">
         Maintainers can sign in at{" "}
-        <span className="font-mono text-gray-800">/maintainer</span> and manage
-        offerings only. When you create a maintainer, copy the generated ID and
-        password immediately.
+        <span className="font-mono text-gray-800">/maintainer</span> using the
+        email and password you assign when creating their account.
       </p>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <Table>
           <TableHeader className="bg-gray-50/50">
             <TableRow>
-              <TableHead>Login ID</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>Label</TableHead>
               <TableHead>Created</TableHead>
               <TableHead className="w-[100px] text-right">Actions</TableHead>
