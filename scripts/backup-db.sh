@@ -12,6 +12,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
+# shellcheck disable=SC1091
+source "$ROOT/scripts/lib/pg-dump.sh"
+
 if [[ -f .env ]]; then
   set -a
   # shellcheck disable=SC1091
@@ -24,10 +27,8 @@ if [[ -z "${DB_URI:-}" ]]; then
   exit 1
 fi
 
-if ! command -v pg_dump >/dev/null 2>&1; then
-  echo "Error: pg_dump not found. Install PostgreSQL client tools." >&2
-  exit 1
-fi
+PG_DUMP_BIN="$(resolve_pg_dump)"
+pg_dump_version_hint "$PG_DUMP_BIN"
 
 BACKUP_DIR="${BACKUP_DIR:-$ROOT/backups}"
 mkdir -p "$BACKUP_DIR"
@@ -38,7 +39,7 @@ OUT="$BACKUP_DIR/gkg-vyaspuja-${STAMP}.dump"
 export PGSSLMODE="${PGSSLMODE:-require}"
 
 echo "Creating backup..."
-pg_dump "$DB_URI" \
+"$PG_DUMP_BIN" "$DB_URI" \
   --format=custom \
   --no-owner \
   --no-acl \

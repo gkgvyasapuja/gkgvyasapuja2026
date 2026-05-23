@@ -6,10 +6,12 @@
  *   BACKUP_RETENTION_DAYS=30 npm run db:backup:s3
  *
  * Env: DB_URI, AWS_REGION, AWS_S3_BUCKET, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
- * Optional: BACKUP_RETENTION_DAYS (default 14), PGSSLMODE (default require)
+ * Optional: BACKUP_RETENTION_DAYS (default 14), PGSSLMODE (default require),
+ *             PG_DUMP (path to pg_dump, must match server major version)
  */
 import { config } from "dotenv";
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -44,28 +46,59 @@ function timestamp(): string {
     .slice(0, 19);
 }
 
-function createDump(dbUri: string, stamp: string): { dir: string; filePath: string } {
+function resolvePgDump(): string {
+  const candidates = [
+    process.env.PG_DUMP?.trim(),
+    "/opt/homebrew/opt/postgresql@17/bin/pg_dump",
+    "/opt/homebrew/opt/postgresql@16/bin/pg_dump",
+    "/usr/local/opt/postgresql@17/bin/pg_dump",
+    "/usr/local/opt/postgresql@16/bin/pg_dump",
+  ].filter(Boolean) as string[];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+
   try {
     execFileSync("pg_dump", ["--version"], { stdio: "ignore" });
+    return "pg_dump";
   } catch {
-    throw new Error("pg_dump not found. Install PostgreSQL client tools.");
+    throw new Error(
+      "pg_dump not found. Install PostgreSQL 16+ client tools:\n" +
+        "  brew install postgresql@16\n" +
+        "Then set PG_DUMP=/opt/homebrew/opt/postgresql@16/bin/pg_dump in .env",
+    );
   }
+}
+
+function createDump(dbUri: string, stamp: string): { dir: string; filePath: string } {
+  const pgDump = resolvePgDump();
+  const version = execFileSync(pgDump, ["--version"], { encoding: "utf8" }).trim();
+  console.log(`Using ${pgDump} (${version})`);
 
   const dir = mkdtempSync(join(tmpdir(), "gkg-db-backup-"));
   const filePath = join(dir, `gkg-vyaspuja-${stamp}.dump`);
 
   console.log("Creating pg_dump backup...");
-  execFileSync(
-    "pg_dump",
-    [dbUri, "--format=custom", "--no-owner", "--no-acl", `--file=${filePath}`],
-    {
-      env: {
-        ...process.env,
-        PGSSLMODE: process.env.PGSSLMODE ?? "require",
+  try {
+    execFileSync(
+      pgDump,
+      [dbUri, "--format=custom", "--no-owner", "--no-acl", `--file=${filePath}`],
+      {
+        env: {
+          ...process.env,
+          PGSSLMODE: process.env.PGSSLMODE ?? "require",
+        },
+        stdio: "inherit",
       },
-      stdio: "inherit",
-    },
-  );
+    );
+  } catch {
+    throw new Error(
+      "pg_dump failed. If you see a version mismatch, install PostgreSQL 16 client:\n" +
+        "  brew install postgresql@16\n" +
+        "  PG_DUMP=/opt/homebrew/opt/postgresql@16/bin/pg_dump",
+    );
+  }
 
   return { dir, filePath };
 }
