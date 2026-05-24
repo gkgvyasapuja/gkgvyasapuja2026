@@ -1,9 +1,23 @@
 /** Rows from getAdminOfferings / export with staff-edit columns. */
-export function hasStaffEdit(row: { lastEditedAt: Date | string | null }) {
-  return row.lastEditedAt != null;
+
+export function hasStaffEdit(row: { markedEditedAt: Date | string | null }) {
+  return row.markedEditedAt != null;
 }
 
-export function staffEditorLabel(row: {
+export function staffMarkerLabel(row: {
+  markedEditedAt: Date | string | null;
+  markedEditedByRole: "admin" | "maintainer" | null;
+  markedEditorLabel: string | null;
+  markedEditorLoginId: string | null;
+}): string | null {
+  if (!row.markedEditedAt) return null;
+  if (row.markedEditedByRole === "admin") return "Admin";
+  return (
+    row.markedEditorLabel?.trim() || row.markedEditorLoginId || "Maintainer"
+  );
+}
+
+export function contentEditorLabel(row: {
   lastEditedAt: Date | string | null;
   lastEditedByRole: "admin" | "maintainer" | null;
   lastEditorLabel: string | null;
@@ -14,6 +28,16 @@ export function staffEditorLabel(row: {
   return (
     row.lastEditorLabel?.trim() || row.lastEditorLoginId || "Maintainer"
   );
+}
+
+/** @deprecated Use staffMarkerLabel or contentEditorLabel. */
+export function staffEditorLabel(row: {
+  markedEditedAt: Date | string | null;
+  markedEditedByRole: "admin" | "maintainer" | null;
+  markedEditorLabel: string | null;
+  markedEditorLoginId: string | null;
+}): string | null {
+  return staffMarkerLabel(row);
 }
 
 export function formatStaffEditedAt(

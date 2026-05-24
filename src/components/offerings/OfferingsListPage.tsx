@@ -10,8 +10,10 @@ import { OfferingNoteCell } from "@/components/offerings/OfferingNoteCell";
 import {
   hasStaffEdit,
   offeringHasImages,
-  staffEditorLabel,
+  staffMarkerLabel,
+  contentEditorLabel,
 } from "@/lib/offering-staff-edit";
+import { OfferingMarkEditedControls } from "@/components/offerings/OfferingMarkEditedControls";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -32,6 +34,9 @@ function templeDisplayName(item: OfferingRow) {
   if (item.user.otherTempleName) return `Other (${item.user.otherTempleName})`;
   return "—";
 }
+
+const thClass = "text-center align-middle";
+const tdClass = "text-center align-middle";
 
 export interface OfferingsListPageProps {
   offerings: OfferingRow[];
@@ -87,27 +92,36 @@ export function OfferingsListPage({
           <Table>
             <TableHeader className="bg-gray-50/50">
               <TableRow>
-                <TableHead>Devotee</TableHead>
-                <TableHead>Initiated Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Year</TableHead>
-                <TableHead>Country</TableHead>
-                <TableHead>State</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Temple</TableHead>
-                <TableHead>Language</TableHead>
-                <TableHead className="whitespace-nowrap">Staff edited</TableHead>
-                <TableHead className="whitespace-nowrap">Images</TableHead>
-                <TableHead className="min-w-[200px]">Offering</TableHead>
-                <TableHead className="min-w-[200px]">Note</TableHead>
-                <TableHead className="whitespace-nowrap">Document</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead className={thClass}>Devotee</TableHead>
+                <TableHead className={thClass}>Initiated Name</TableHead>
+                <TableHead className={thClass}>Phone</TableHead>
+                <TableHead className={thClass}>Year</TableHead>
+                <TableHead className={thClass}>Country</TableHead>
+                <TableHead className={thClass}>State</TableHead>
+                <TableHead className={thClass}>City</TableHead>
+                <TableHead className={thClass}>Temple</TableHead>
+                <TableHead className={thClass}>Language</TableHead>
+                <TableHead className={cn(thClass, "whitespace-nowrap")}>
+                  Staff edited
+                </TableHead>
+                <TableHead className={cn(thClass, "whitespace-nowrap")}>
+                  Images
+                </TableHead>
+                <TableHead className={cn(thClass, "min-w-[200px]")}>
+                  Offering
+                </TableHead>
+                <TableHead className={cn(thClass, "min-w-[200px]")}>Note</TableHead>
+                <TableHead className={cn(thClass, "whitespace-nowrap")}>
+                  Document
+                </TableHead>
+                <TableHead className={thClass}>Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {offerings.map((item) => {
                 const edited = hasStaffEdit(item);
-                const editor = staffEditorLabel(item);
+                const marker = staffMarkerLabel(item);
+                const contentEditor = contentEditorLabel(item);
                 const withImages = offeringHasImages(item.offering);
                 return (
                 <TableRow
@@ -118,33 +132,33 @@ export function OfferingsListPage({
                       : "bg-red-50/80 hover:bg-red-50/90 data-[state=selected]:bg-red-50/80",
                   )}
                 >
-                  <TableCell className="font-medium text-gray-900 whitespace-nowrap">
+                  <TableCell className={cn(tdClass, "font-medium text-gray-900 whitespace-nowrap")}>
                     {item.user.firstName} {item.user.lastName}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className={cn(tdClass, "whitespace-nowrap")}>
                     {item.user.initiatedName || "-"}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap text-sm text-gray-800">
+                  <TableCell className={cn(tdClass, "whitespace-nowrap text-sm text-gray-800")}>
                     {item.user.phone || "—"}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{item.year}</TableCell>
-                  <TableCell className="text-sm text-gray-700 max-w-[140px] truncate">
+                  <TableCell className={cn(tdClass, "whitespace-nowrap")}>{item.year}</TableCell>
+                  <TableCell className={cn(tdClass, "text-sm text-gray-700 max-w-[140px] truncate")}>
                     {item.countryName ?? "—"}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-700 max-w-[140px] truncate">
+                  <TableCell className={cn(tdClass, "text-sm text-gray-700 max-w-[140px] truncate")}>
                     {item.stateName ?? "—"}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-700 max-w-[140px] truncate">
+                  <TableCell className={cn(tdClass, "text-sm text-gray-700 max-w-[140px] truncate")}>
                     {item.cityName ?? "—"}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-700 max-w-[160px] truncate">
+                  <TableCell className={cn(tdClass, "text-sm text-gray-700 max-w-[160px] truncate")}>
                     {templeDisplayName(item)}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className={cn(tdClass, "whitespace-nowrap")}>
                     {item.language}
                   </TableCell>
-                  <TableCell className="text-sm align-top">
-                    <div className="flex flex-col gap-0.5">
+                  <TableCell className={cn(tdClass, "text-sm whitespace-normal")}>
+                    <div className="flex flex-col items-center justify-center gap-1 mx-auto max-w-[160px]">
                       <span
                         className={cn(
                           "font-medium",
@@ -153,14 +167,22 @@ export function OfferingsListPage({
                       >
                         {edited ? "Yes" : "No"}
                       </span>
-                      {editor ? (
-                        <span className="text-xs text-gray-600 max-w-[140px]">
-                          {editor}
+                      {marker ? (
+                        <span className="text-xs text-gray-600 text-center">
+                          Marked by {marker}
+                        </span>
+                      ) : contentEditor ? (
+                        <span className="text-xs text-gray-500 text-center">
+                          Last edit: {contentEditor}
                         </span>
                       ) : null}
+                      <OfferingMarkEditedControls
+                        offeringId={item.id}
+                        marked={edited}
+                      />
                     </div>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className={cn(tdClass, "whitespace-nowrap")}>
                     {withImages ? (
                       <span
                         className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800"
@@ -173,8 +195,9 @@ export function OfferingsListPage({
                       <span className="text-xs text-gray-500">No</span>
                     )}
                   </TableCell>
-                  <TableCell>
-                    <ViewEditOfferingModal
+                  <TableCell className={cn(tdClass)}>
+                    <div className="flex justify-center">
+                      <ViewEditOfferingModal
                       offering={{
                         id: item.id,
                         offering: item.offering,
@@ -183,20 +206,21 @@ export function OfferingsListPage({
                         userParams: `${item.user.firstName} ${item.user.lastName} - ${item.year}`,
                       }}
                     />
+                    </div>
                   </TableCell>
-                  <TableCell className="align-top">
+                  <TableCell className={cn(tdClass, "whitespace-normal")}>
                     <OfferingNoteCell
                       offeringId={item.id}
                       initialNote={item.note}
                     />
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className={cn(tdClass, "whitespace-nowrap")}>
                     {item.documentUrl ? (
                       <a
                         href={item.documentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 hover:underline text-sm"
+                        className="inline-flex items-center justify-center gap-1.5 text-indigo-600 hover:text-indigo-800 hover:underline text-sm"
                         title="Download original .docx"
                       >
                         <FileDown className="h-3.5 w-3.5" aria-hidden />
@@ -206,7 +230,7 @@ export function OfferingsListPage({
                       <span className="text-sm text-gray-400">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-sm whitespace-nowrap">
+                  <TableCell className={cn(tdClass, "text-sm whitespace-nowrap")}>
                     {item.createdAt
                       ? new Date(item.createdAt).toLocaleDateString()
                       : "-"}

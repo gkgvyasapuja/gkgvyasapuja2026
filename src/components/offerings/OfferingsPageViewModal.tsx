@@ -6,10 +6,12 @@ import type { getAdminOfferings } from "@/app/(admin)/actions/admin";
 import { editOffering } from "@/app/(admin)/actions/admin";
 import {
   hasStaffEdit,
-  staffEditorLabel,
+  staffMarkerLabel,
+  contentEditorLabel,
   formatStaffEditedAt,
   offeringHasImages,
 } from "@/lib/offering-staff-edit";
+import { OfferingMarkEditedControls } from "@/components/offerings/OfferingMarkEditedControls";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -90,7 +92,8 @@ function OfferingBlock({ item }: { item: OfferingPageItem }) {
   }
 
   const staffEdited = hasStaffEdit(item);
-  const editor = staffEditorLabel(item);
+  const marker = staffMarkerLabel(item);
+  const contentEditor = contentEditorLabel(item);
   const withImages = offeringHasImages(item.offering);
 
   return (
@@ -127,10 +130,20 @@ function OfferingBlock({ item }: { item: OfferingPageItem }) {
             )}
           >
             Staff edited: {staffEdited ? "Yes" : "No"}
-            {editor
-              ? ` — ${editor} (${formatStaffEditedAt(item.lastEditedAt)})`
+            {marker
+              ? ` — marked by ${marker} (${formatStaffEditedAt(item.markedEditedAt)})`
               : null}
           </p>
+          {contentEditor ? (
+            <p className="text-xs text-gray-500">
+              Last content edit: {contentEditor} (
+              {formatStaffEditedAt(item.lastEditedAt)})
+            </p>
+          ) : null}
+          <OfferingMarkEditedControls
+            offeringId={item.id}
+            marked={staffEdited}
+          />
           {withImages && (
             <p className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800 w-fit">
               <ImageIcon className="h-3 w-3" aria-hidden />

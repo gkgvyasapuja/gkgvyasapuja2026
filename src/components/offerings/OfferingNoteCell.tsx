@@ -37,16 +37,16 @@ export function OfferingNoteCell({
   }
 
   return (
-    <div className="min-w-[180px] max-w-[240px] space-y-1.5">
+    <div className="min-w-[180px] max-w-[240px] mx-auto space-y-1.5">
       <Textarea
         value={note}
         onChange={(e) => setNote(e.target.value)}
         placeholder="Add a note…"
         rows={2}
         disabled={pending}
-        className="min-h-14 text-xs resize-y"
+        className="min-h-14 text-xs resize-y text-left"
       />
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-center gap-2">
         {error ? (
           <span className="text-[11px] text-red-600 truncate" title={error}>
             {error}

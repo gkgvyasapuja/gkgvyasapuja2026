@@ -117,7 +117,17 @@ export const offerings = pgTable("offering", {
   /** Internal staff note (admin/maintainer only). */
   note: text("note"),
 
-  /** Set when staff (admin/maintainer) edits; null means never staff-edited. */
+  /** Manual review flag — green row when set (admin/maintainer). */
+  markedEditedAt: timestamp("marked_edited_at"),
+  markedEditedByRole: varchar("marked_edited_by_role", {
+    length: 32,
+  }).$type<"admin" | "maintainer" | null>(),
+  markedEditedByMaintainerId: uuid("marked_edited_by_maintainer_id").references(
+    () => maintainers.id,
+    { onDelete: "set null" },
+  ),
+
+  /** Last time staff changed offering content (audit; does not affect row color). */
   lastEditedAt: timestamp("last_edited_at"),
   lastEditedByRole: varchar("last_edited_by_role", { length: 32 }).$type<
     "admin" | "maintainer" | null

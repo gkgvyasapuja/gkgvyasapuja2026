@@ -21,6 +21,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { revalidatePath } from "next/cache";
 
 const lastEditorMaintainer = alias(maintainers, "last_editor_maintainer");
+const markedEditorMaintainer = alias(maintainers, "marked_editor_maintainer");
 
 // --- Country Actions ---
 
@@ -668,6 +669,11 @@ export async function getAdminOfferings(filters?: {
       stateName: states.name,
       cityName: cities.name,
       templeName: temples.name,
+      markedEditedAt: offerings.markedEditedAt,
+      markedEditedByRole: offerings.markedEditedByRole,
+      markedEditedByMaintainerId: offerings.markedEditedByMaintainerId,
+      markedEditorLabel: markedEditorMaintainer.label,
+      markedEditorLoginId: markedEditorMaintainer.loginId,
       lastEditedAt: offerings.lastEditedAt,
       lastEditedByRole: offerings.lastEditedByRole,
       lastEditedByMaintainerId: offerings.lastEditedByMaintainerId,
@@ -683,6 +689,10 @@ export async function getAdminOfferings(filters?: {
     .leftJoin(
       lastEditorMaintainer,
       eq(offerings.lastEditedByMaintainerId, lastEditorMaintainer.id),
+    )
+    .leftJoin(
+      markedEditorMaintainer,
+      eq(offerings.markedEditedByMaintainerId, markedEditorMaintainer.id),
     )
     .where(whereClause)
     .orderBy(desc(offerings.createdAt))
@@ -748,6 +758,11 @@ export async function getAdminOfferingsForExport(filters?: {
       stateName: states.name,
       cityName: cities.name,
       templeName: temples.name,
+      markedEditedAt: offerings.markedEditedAt,
+      markedEditedByRole: offerings.markedEditedByRole,
+      markedEditedByMaintainerId: offerings.markedEditedByMaintainerId,
+      markedEditorLabel: markedEditorMaintainer.label,
+      markedEditorLoginId: markedEditorMaintainer.loginId,
       lastEditedAt: offerings.lastEditedAt,
       lastEditedByRole: offerings.lastEditedByRole,
       lastEditedByMaintainerId: offerings.lastEditedByMaintainerId,
@@ -763,6 +778,10 @@ export async function getAdminOfferingsForExport(filters?: {
     .leftJoin(
       lastEditorMaintainer,
       eq(offerings.lastEditedByMaintainerId, lastEditorMaintainer.id),
+    )
+    .leftJoin(
+      markedEditorMaintainer,
+      eq(offerings.markedEditedByMaintainerId, markedEditorMaintainer.id),
     )
     .where(whereClause)
     .orderBy(desc(offerings.createdAt))
@@ -831,6 +850,60 @@ export async function updateOfferingNote(id: string, note: string) {
     return { success: true as const };
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Could not save note.";
+    return { success: false as const, error: message };
+  }
+}
+
+export async function markOfferingEdited(id: string) {
+  await assertCanManageOfferings();
+
+  try {
+    const ctx = await getOfferingEditorContext();
+    const now = new Date();
+    const role = ctx.role === "admin" ? "admin" : "maintainer";
+    const maintainerId =
+      ctx.role === "maintainer" ? ctx.maintainerId : null;
+
+    await db
+      .update(offerings)
+      .set({
+        markedEditedAt: now,
+        markedEditedByRole: role,
+        markedEditedByMaintainerId: maintainerId,
+        updatedAt: now,
+      })
+      .where(eq(offerings.id, id));
+
+    revalidatePath("/admin-dashboard/offerings");
+    revalidatePath("/maintainer-dashboard/offerings");
+    return { success: true as const };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Could not mark as edited.";
+    return { success: false as const, error: message };
+  }
+}
+
+export async function unmarkOfferingEdited(id: string) {
+  await assertCanManageOfferings();
+
+  try {
+    await db
+      .update(offerings)
+      .set({
+        markedEditedAt: null,
+        markedEditedByRole: null,
+        markedEditedByMaintainerId: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(offerings.id, id));
+
+    revalidatePath("/admin-dashboard/offerings");
+    revalidatePath("/maintainer-dashboard/offerings");
+    return { success: true as const };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Could not unmark as edited.";
     return { success: false as const, error: message };
   }
 }

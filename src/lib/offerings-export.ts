@@ -1,7 +1,8 @@
 import type { AdminOfferingExportRow } from "@/app/(admin)/actions/admin";
 import {
   hasStaffEdit,
-  staffEditorLabel,
+  staffMarkerLabel,
+  contentEditorLabel,
   formatStaffEditedAt,
   offeringHasImages,
 } from "@/lib/offering-staff-edit";
@@ -119,7 +120,9 @@ export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
     "File name": offeringFileName(r.documentUrl),
     Language: r.language,
     "Staff edited": hasStaffEdit(r) ? "Yes" : "No",
-    "Last edited by": staffEditorLabel(r) ?? "",
+    "Marked by": staffMarkerLabel(r) ?? "",
+    "Marked at": formatStaffEditedAt(r.markedEditedAt),
+    "Last edited by": contentEditorLabel(r) ?? "",
     "Last edited at": formatStaffEditedAt(r.lastEditedAt),
     "Has images": offeringHasImages(r.offering) ? "Yes" : "No",
     Note: r.note ?? "",
