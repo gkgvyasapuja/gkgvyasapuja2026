@@ -6,6 +6,7 @@ import { ViewEditOfferingModal } from "@/app/(admin)/admin-dashboard/offerings/_
 import { OfferingsExportButtons } from "@/components/offerings/OfferingsExportButtons";
 import { OfferingsPageViewModal } from "@/components/offerings/OfferingsPageViewModal";
 import { OfferingsPagination } from "@/components/offerings/OfferingsPagination";
+import { OfferingNoteCell } from "@/components/offerings/OfferingNoteCell";
 import {
   hasStaffEdit,
   offeringHasImages,
@@ -98,6 +99,7 @@ export function OfferingsListPage({
                 <TableHead className="whitespace-nowrap">Staff edited</TableHead>
                 <TableHead className="whitespace-nowrap">Images</TableHead>
                 <TableHead className="min-w-[200px]">Offering</TableHead>
+                <TableHead className="min-w-[200px]">Note</TableHead>
                 <TableHead className="whitespace-nowrap">Document</TableHead>
                 <TableHead>Date</TableHead>
               </TableRow>
@@ -182,6 +184,12 @@ export function OfferingsListPage({
                       }}
                     />
                   </TableCell>
+                  <TableCell className="align-top">
+                    <OfferingNoteCell
+                      offeringId={item.id}
+                      initialNote={item.note}
+                    />
+                  </TableCell>
                   <TableCell className="whitespace-nowrap">
                     {item.documentUrl ? (
                       <a
@@ -209,7 +217,7 @@ export function OfferingsListPage({
               {offerings.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={14}
+                    colSpan={15}
                     className="h-24 text-center text-gray-500"
                   >
                     No offerings found for the selected filters.

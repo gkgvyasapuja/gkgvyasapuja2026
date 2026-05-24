@@ -650,6 +650,7 @@ export async function getAdminOfferings(filters?: {
       offering: offerings.offering,
       language: offerings.language,
       documentUrl: offerings.documentUrl,
+      note: offerings.note,
       createdAt: offerings.createdAt,
       user: {
         id: users.id,
@@ -727,6 +728,7 @@ export async function getAdminOfferingsForExport(filters?: {
       offering: offerings.offering,
       language: offerings.language,
       documentUrl: offerings.documentUrl,
+      note: offerings.note,
       createdAt: offerings.createdAt,
       user: {
         id: users.id,
@@ -809,5 +811,26 @@ export async function editOffering(
     return { success: true };
   } catch (error: any) {
     return { success: false, error: error.message };
+  }
+}
+
+export async function updateOfferingNote(id: string, note: string) {
+  await assertCanManageOfferings();
+
+  try {
+    await db
+      .update(offerings)
+      .set({
+        note: note.trim() || null,
+        updatedAt: new Date(),
+      })
+      .where(eq(offerings.id, id));
+
+    revalidatePath("/admin-dashboard/offerings");
+    revalidatePath("/maintainer-dashboard/offerings");
+    return { success: true as const };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Could not save note.";
+    return { success: false as const, error: message };
   }
 }

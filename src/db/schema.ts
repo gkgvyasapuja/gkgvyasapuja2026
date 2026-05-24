@@ -114,6 +114,9 @@ export const offerings = pgTable("offering", {
     .$type<"Hindi" | "English">()
     .notNull(),
 
+  /** Internal staff note (admin/maintainer only). */
+  note: text("note"),
+
   /** Set when staff (admin/maintainer) edits; null means never staff-edited. */
   lastEditedAt: timestamp("last_edited_at"),
   lastEditedByRole: varchar("last_edited_by_role", { length: 32 }).$type<

@@ -122,6 +122,7 @@ export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
     "Last edited by": staffEditorLabel(r) ?? "",
     "Last edited at": formatStaffEditedAt(r.lastEditedAt),
     "Has images": offeringHasImages(r.offering) ? "Yes" : "No",
+    Note: r.note ?? "",
     Date: r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "",
   }));
   const ws = XLSX.utils.json_to_sheet(data);
@@ -142,41 +143,11 @@ export async function buildOfferingsDocxBuffer(rows: AdminOfferingExportRow[]) {
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
     const name = `${r.user.firstName} ${r.user.lastName}`.trim();
-    const displayTemple =
-      r.templeName ??
-      (r.user.otherTempleName ? `Other (${r.user.otherTempleName})` : null);
-    const location = [r.countryName, r.stateName, r.cityName, displayTemple]
-      .filter(Boolean)
-      .join(" · ");
 
     children.push(
       new Paragraph({
         text: `${i + 1}. ${name} — ${r.year}`,
         heading: HeadingLevel.HEADING_2,
-      }),
-    );
-    children.push(
-      new Paragraph({
-        text: `Initiated name: ${r.user.initiatedName || "—"} | Phone: ${r.user.phone || "—"} | Language: ${r.language} | Submitted: ${r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "—"}`,
-      }),
-    );
-    children.push(
-      new Paragraph({
-        text: location ? `Location: ${location}` : "Location: —",
-      }),
-    );
-    children.push(
-      new Paragraph({
-        text: hasStaffEdit(r)
-          ? `Staff edited: Yes — ${staffEditorLabel(r)} (${formatStaffEditedAt(r.lastEditedAt)})`
-          : "Staff edited: No",
-      }),
-    );
-    children.push(
-      new Paragraph({
-        text: offeringHasImages(r.offering)
-          ? "Contains images: Yes"
-          : "Contains images: No",
       }),
     );
 
