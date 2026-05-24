@@ -732,6 +732,8 @@ export async function getAdminOfferingsForExport(filters?: {
         id: users.id,
         firstName: users.firstName,
         lastName: users.lastName,
+        email: users.email,
+        gender: users.gender,
         initiatedName: users.initiatedName,
         phone: users.phone,
         countryId: users.countryId,

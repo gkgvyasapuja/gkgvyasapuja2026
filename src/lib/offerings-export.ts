@@ -107,6 +107,8 @@ export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
 
   const data = rows.map((r) => ({
     Devotee: `${r.user.firstName} ${r.user.lastName}`.trim(),
+    Email: r.user.email || "",
+    Gender: r.user.gender || "",
     "Initiated Name": r.user.initiatedName || "",
     Phone: r.user.phone || "",
     Year: r.year,
