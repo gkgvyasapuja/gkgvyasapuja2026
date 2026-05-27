@@ -66,12 +66,28 @@ export default function QuillWrapper({ value, onChange }: QuillWrapperProps) {
     [],
   );
 
+  const formats = useMemo(
+    () => [
+      "header",
+      "align",
+      "bold",
+      "italic",
+      "underline",
+      "strike",
+      "list",
+      "link",
+      "aiCorrection",
+    ],
+    [],
+  );
+
   return (
     <ReactQuill
       theme="snow"
       value={value}
       onChange={onChange}
       modules={modules}
+      formats={formats}
       className="h-full w-full custom-quill-container"
     />
   );

@@ -36,7 +36,7 @@ ${htmlContent}
 `;
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.5-flash-lite",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -44,7 +44,10 @@ ${htmlContent}
     });
 
     const responseText = response.text || "{}";
-    const resultObj = JSON.parse(responseText);
+    const resultObj = JSON.parse(responseText) as {
+      language?: "Hindi" | "English";
+      correctedHtml?: string;
+    };
 
     return {
       success: true,

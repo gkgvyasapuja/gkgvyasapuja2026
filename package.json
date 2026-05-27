@@ -25,7 +25,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1024.0",
     "@base-ui/react": "^1.2.0",
-    "@google/genai": "^1.44.0",
+    "@google/genai": "^2.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "docx": "^9.6.1",

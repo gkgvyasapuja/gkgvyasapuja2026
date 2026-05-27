@@ -18,6 +18,10 @@ import {
   deleteObjectByUrl,
   uploadOfferingDocx,
 } from "@/lib/s3";
+import {
+  applyParagraphAlignments,
+  extractDocxParagraphAlignments,
+} from "@/lib/docx-html-alignment";
 const mammoth = require("mammoth");
 
 function formDataString(fd: FormData, key: string): string {
@@ -394,7 +398,11 @@ export async function parseDocx(formData: FormData) {
         }),
       },
     );
-    return { success: true, text: result.value, hasImages };
+
+    const alignments = await extractDocxParagraphAlignments(buffer);
+    const html = applyParagraphAlignments(result.value, alignments);
+
+    return { success: true, text: html, hasImages };
   } catch (error) {
     console.error("Failed to parse docx:", error);
     return {
