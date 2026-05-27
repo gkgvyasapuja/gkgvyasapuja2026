@@ -145,14 +145,6 @@ export async function buildOfferingsDocxBuffer(rows: AdminOfferingExportRow[]) {
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
-    const name = `${r.user.firstName} ${r.user.lastName}`.trim();
-
-    children.push(
-      new Paragraph({
-        text: `${i + 1}. ${name} — ${r.year}`,
-        heading: HeadingLevel.HEADING_2,
-      }),
-    );
 
     const body = stripHtmlForExport(r.offering);
     for (const line of body.split(/\r?\n/)) {

@@ -53,6 +53,7 @@ export default function QuillWrapper({ value, onChange }: QuillWrapperProps) {
     () => ({
       toolbar: [
         [{ header: [1, 2, 3, false] }],
+        [{ align: [] }],
         ["bold", "italic", "underline", "strike"],
         [{ list: "ordered" }, { list: "bullet" }],
         ["link"],

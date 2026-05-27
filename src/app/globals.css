@@ -153,3 +153,17 @@
 .upload-offering-quill .custom-quill-container .ql-editor {
   min-height: 320px;
 }
+
+/* Quill alignment — editor + read-only offering HTML (admin view, previews) */
+.ql-align-center,
+.prose .ql-align-center {
+  text-align: center;
+}
+.ql-align-right,
+.prose .ql-align-right {
+  text-align: right;
+}
+.ql-align-justify,
+.prose .ql-align-justify {
+  text-align: justify;
+}
