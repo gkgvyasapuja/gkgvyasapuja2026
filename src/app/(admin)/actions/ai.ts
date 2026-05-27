@@ -1,12 +1,13 @@
 "use server";
 
 import { GoogleGenAI } from "@google/genai";
+import { formatOfferingSpellingRulesForPrompt } from "@/lib/offering-spelling-rules";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function fixGrammar(htmlContent: string) {
   try {
-    const adminPrompt = 'Correct the word, "Maharaja" or similar to "Maharaj"';
+    const spellingRules = formatOfferingSpellingRulesForPrompt();
 
     const prompt = `
 You are an expert editor. The user has provided an HTML document.
@@ -28,7 +29,7 @@ Your response MUST be a valid JSON object with the following structure:
 }
 
 Additional Custom Rules:
-${adminPrompt}
+${spellingRules}
 
 Here is the HTML content to fix:
 ${htmlContent}
