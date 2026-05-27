@@ -46,9 +46,14 @@ if (Quill) {
 interface QuillWrapperProps {
   value: string;
   onChange: (content: string) => void;
+  readOnly?: boolean;
 }
 
-export default function QuillWrapper({ value, onChange }: QuillWrapperProps) {
+export default function QuillWrapper({
+  value,
+  onChange,
+  readOnly = false,
+}: QuillWrapperProps) {
   const modules = useMemo(
     () => ({
       toolbar: [
@@ -86,6 +91,7 @@ export default function QuillWrapper({ value, onChange }: QuillWrapperProps) {
       theme="snow"
       value={value}
       onChange={onChange}
+      readOnly={readOnly}
       modules={modules}
       formats={formats}
       className="h-full w-full custom-quill-container"

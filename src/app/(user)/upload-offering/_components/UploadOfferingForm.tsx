@@ -510,6 +510,7 @@ export default function UploadOfferingForm() {
                       setSuggestionRequiresAction(requiresAction);
                       setSuggestionActionCompleted(actionCompleted);
                     }}
+                    editorDisabled={isFixingText}
                   />
                   {(isFixingText ||
                     (isReviewing && !hasImages && !aiGrammarFailed)) && (
@@ -631,6 +632,26 @@ export default function UploadOfferingForm() {
           </div>
         </div>
       </div>
+
+      {isFixingText && step === 3 && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-5 right-5 z-50 flex max-w-sm items-start gap-3 rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-50 px-4 py-3.5 shadow-lg shadow-amber-900/10 ring-1 ring-amber-100 animate-in fade-in slide-in-from-bottom-4 duration-300"
+        >
+          <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+            <Loader2 className="size-5 animate-spin" aria-hidden />
+          </div>
+          <div className="min-w-0 pt-0.5">
+            <p className="text-sm font-semibold text-amber-950">
+              Reviewing your offering
+            </p>
+            <p className="mt-0.5 text-sm leading-snug text-amber-900/80">
+              Please wait for a minute, we are reviewing your offering.
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 }

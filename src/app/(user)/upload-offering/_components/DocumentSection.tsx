@@ -30,6 +30,7 @@ interface Props {
     requiresAction: boolean,
     actionCompleted: boolean,
   ) => void;
+  editorDisabled?: boolean;
 }
 
 const navy = "text-[#0f2744]";
@@ -44,6 +45,7 @@ export function DocumentSection({
   formData,
   handleSelectChange,
   onSuggestionStateChange,
+  editorDisabled = false,
 }: Props) {
   const changes = useAiChanges(extractedText);
   const [decision, setDecision] = useState<"unset" | "keep" | "accept">(
@@ -228,13 +230,24 @@ export function DocumentSection({
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
                 <div>
-                  <div className="upload-offering-quill w-full h-[60vh] rounded-2xl border border-slate-200 bg-white shadow-sm focus-within:border-[#0f2744]/30 focus-within:ring-2 focus-within:ring-[#0f2744]/15 overflow-hidden flex flex-col">
-                    <div className="flex-1 overflow-y-auto">
+                  <div
+                    className={`upload-offering-quill relative w-full h-[60vh] rounded-2xl border border-slate-200 bg-white shadow-sm focus-within:border-[#0f2744]/30 focus-within:ring-2 focus-within:ring-[#0f2744]/15 overflow-hidden flex flex-col ${editorDisabled ? "opacity-75" : ""}`}
+                  >
+                    <div
+                      className={`flex-1 overflow-y-auto ${editorDisabled ? "pointer-events-none select-none" : ""}`}
+                    >
                       <QuillEditor
                         value={extractedText}
                         onChange={setExtractedText}
+                        readOnly={editorDisabled}
                       />
                     </div>
+                    {editorDisabled && (
+                      <div
+                        className="absolute inset-0 z-10 cursor-not-allowed bg-amber-50/30"
+                        aria-hidden
+                      />
+                    )}
                   </div>
 
                   {changes.length > 0 && (
