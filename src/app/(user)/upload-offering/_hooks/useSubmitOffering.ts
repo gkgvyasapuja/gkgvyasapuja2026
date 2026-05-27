@@ -157,7 +157,8 @@ export function useSubmitOffering(
       if (result.success && result.text) {
         setExtractedText(result.text);
         if (result.language) {
-          setFormData((prev) => ({ ...prev, language: result.language }));
+          const language = result.language;
+          setFormData((prev) => ({ ...prev, language }));
         }
 
         if (result.text.includes("ai-correction")) {
