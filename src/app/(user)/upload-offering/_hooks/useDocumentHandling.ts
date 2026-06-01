@@ -1,6 +1,26 @@
 import { useState } from "react";
 import { parseDocx } from "@/app/(admin)/actions/offering";
 import { recordAppLog } from "@/app/(admin)/actions/logs";
+import {
+  isOfferingDocTooLarge,
+  PARSE_DOCX_TIMEOUT_MS,
+} from "@/lib/offering-document-limits";
+
+const RETRY_HINT =
+  " Please select your .docx file and try uploading again.";
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error("PARSE_TIMEOUT")), ms);
+    }),
+  ]);
+}
+
+function resetFileInput(input: HTMLInputElement) {
+  input.value = "";
+}
 
 export function useDocumentHandling(setError: (error: string | null) => void) {
   const [file, setFile] = useState<File | null>(null);
@@ -9,52 +29,99 @@ export function useDocumentHandling(setError: (error: string | null) => void) {
   const [hasImages, setHasImages] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0];
-      if (!selectedFile.name.endsWith(".docx")) {
-        setError("Please upload a .docx file.");
-        return;
-      }
-      setFile(selectedFile);
-      setHasImages(false);
-      setError(null);
+    const input = e.target;
+    const selectedFile = input.files?.[0];
+    if (!selectedFile) return;
 
-      // Auto-parse document upon selection
-      setIsParsing(true);
+    if (!selectedFile.name.toLowerCase().endsWith(".docx")) {
+      setError("Please upload a .docx file." + RETRY_HINT);
+      resetFileInput(input);
+      return;
+    }
+
+    if (selectedFile.size === 0) {
+      setError("The selected file is empty." + RETRY_HINT);
+      resetFileInput(input);
+      return;
+    }
+
+    if (isOfferingDocTooLarge(selectedFile.size)) {
+      setError(
+        "File is too large. Maximum size is 2MB." + RETRY_HINT,
+      );
+      resetFileInput(input);
+      return;
+    }
+
+    setFile(selectedFile);
+    setExtractedText("");
+    setHasImages(false);
+    setError(null);
+    setIsParsing(true);
+
+    const startedAt = performance.now();
+    let logSuccess = false;
+    let logError: string | undefined;
+    let logHasImages = false;
+
+    try {
       const fd = new FormData();
       fd.append("file", selectedFile);
 
-      const startedAt = performance.now();
-      const response = await parseDocx(fd);
-      const durationMs = performance.now() - startedAt;
-      setIsParsing(false);
-
-      void recordAppLog({
-        logType: "doc_parse",
-        durationMs,
-        success: response.success,
-        errorMessage: response.success ? undefined : response.error,
-        metadata: {
-          fileName: selectedFile.name,
-          fileSizeBytes: selectedFile.size,
-          hasImages:
-            "hasImages" in response ? Boolean(response.hasImages) : false,
-        },
-      });
+      const response = await withTimeout(
+        parseDocx(fd),
+        PARSE_DOCX_TIMEOUT_MS,
+      );
 
       if (response.success && response.text) {
+        logSuccess = true;
+        logHasImages =
+          "hasImages" in response && Boolean(response.hasImages);
         setExtractedText(response.text);
-        setHasImages("hasImages" in response && Boolean(response.hasImages));
-        if ("hasImages" in response && response.hasImages) {
+        setHasImages(logHasImages);
+        if (logHasImages) {
           alert(
             "This document contains one or more images. Review the preview to ensure your offering text looks correct.",
           );
         }
       } else {
-        setError(response.error || "Failed to parse document.");
+        logError = response.error || "Failed to parse document.";
+        setError(logError + RETRY_HINT);
+        setFile(null);
         setHasImages(false);
-        setFile(null); // Reset file if parsing fails
+        resetFileInput(input);
       }
+    } catch (err) {
+      if (err instanceof Error && err.message === "PARSE_TIMEOUT") {
+        logError = "parse_timeout";
+        setError(
+          "Extracting text took too long. This can happen on a slow connection or with a heavy document. Try again on Wi‑Fi, or use a smaller file." +
+            RETRY_HINT,
+        );
+      } else {
+        logError =
+          err instanceof Error ? err.message : "parse_request_failed";
+        setError(
+          "Something went wrong while reading your document." + RETRY_HINT,
+        );
+      }
+      setFile(null);
+      setExtractedText("");
+      setHasImages(false);
+      resetFileInput(input);
+    } finally {
+      setIsParsing(false);
+      void recordAppLog({
+        logType: "doc_parse",
+        durationMs: performance.now() - startedAt,
+        success: logSuccess,
+        errorMessage: logError,
+        metadata: {
+          fileName: selectedFile.name,
+          fileSizeBytes: selectedFile.size,
+          hasImages: logHasImages,
+        },
+      });
     }
   };
 

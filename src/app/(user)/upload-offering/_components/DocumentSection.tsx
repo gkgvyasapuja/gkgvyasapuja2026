@@ -130,9 +130,11 @@ export function DocumentSection({
       <div className="space-y-6">
         <label
           htmlFor="offering-doc-upload"
-          className={`flex flex-col items-stretch w-full rounded-2xl border-2 border-dashed border-slate-300 bg-white cursor-pointer transition-colors hover:border-slate-400 hover:bg-slate-50/80 ${
-            file ? "border-slate-400 bg-slate-50/50" : ""
-          }`}
+          className={`flex flex-col items-stretch w-full rounded-2xl border-2 border-dashed border-slate-300 bg-white transition-colors ${
+            isParsing
+              ? "cursor-wait opacity-60 pointer-events-none"
+              : "cursor-pointer hover:border-slate-400 hover:bg-slate-50/80"
+          } ${file ? "border-slate-400 bg-slate-50/50" : ""}`}
         >
           <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
             <div className="size-16 rounded-full bg-sky-100 flex items-center justify-center mb-6 shadow-sm">
@@ -167,6 +169,7 @@ export function DocumentSection({
             type="file"
             className="hidden"
             accept=".docx"
+            disabled={isParsing}
             onChange={handleFileChange}
           />
         </label>

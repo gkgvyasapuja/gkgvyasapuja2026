@@ -22,6 +22,7 @@ import {
   applyParagraphAlignments,
   extractDocxParagraphAlignments,
 } from "@/lib/docx-html-alignment";
+import { isOfferingDocTooLarge } from "@/lib/offering-document-limits";
 const mammoth = require("mammoth");
 
 function formDataString(fd: FormData, key: string): string {
@@ -194,6 +195,12 @@ export async function submitOffering(fd: FormData) {
   }
   if (!file.name.toLowerCase().endsWith(".docx")) {
     return { success: false, error: "Only .docx files are accepted." };
+  }
+  if (isOfferingDocTooLarge(file.size)) {
+    return {
+      success: false,
+      error: "File is too large. Maximum size is 2MB.",
+    };
   }
 
   let buffer: Buffer;
@@ -373,11 +380,22 @@ export async function submitOffering(fd: FormData) {
 }
 
 export async function parseDocx(formData: FormData) {
+  const startedAt = Date.now();
   try {
     const file = formData.get("file") as File;
     if (!file) {
       return { success: false, error: "No file provided" };
     }
+    if (file.size === 0) {
+      return { success: false, error: "The uploaded file is empty" };
+    }
+    if (isOfferingDocTooLarge(file.size)) {
+      return {
+        success: false,
+        error: "File is too large. Maximum size is 2MB.",
+      };
+    }
+
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     let hasImages = false;
@@ -402,9 +420,19 @@ export async function parseDocx(formData: FormData) {
     const alignments = await extractDocxParagraphAlignments(buffer);
     const html = applyParagraphAlignments(result.value, alignments);
 
+    console.info("[parseDocx] ok", {
+      size: file.size,
+      htmlLength: html.length,
+      hasImages,
+      ms: Date.now() - startedAt,
+    });
+
     return { success: true, text: html, hasImages };
   } catch (error) {
-    console.error("Failed to parse docx:", error);
+    console.error("[parseDocx] failed", {
+      ms: Date.now() - startedAt,
+      error,
+    });
     return {
       success: false,
       error:
