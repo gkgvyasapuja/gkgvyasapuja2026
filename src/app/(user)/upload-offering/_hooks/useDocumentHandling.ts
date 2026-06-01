@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { parseDocx } from "@/app/(admin)/actions/offering";
+import { recordAppLog } from "@/app/(admin)/actions/logs";
 
 export function useDocumentHandling(setError: (error: string | null) => void) {
   const [file, setFile] = useState<File | null>(null);
@@ -23,8 +24,23 @@ export function useDocumentHandling(setError: (error: string | null) => void) {
       const fd = new FormData();
       fd.append("file", selectedFile);
 
+      const startedAt = performance.now();
       const response = await parseDocx(fd);
+      const durationMs = performance.now() - startedAt;
       setIsParsing(false);
+
+      void recordAppLog({
+        logType: "doc_parse",
+        durationMs,
+        success: response.success,
+        errorMessage: response.success ? undefined : response.error,
+        metadata: {
+          fileName: selectedFile.name,
+          fileSizeBytes: selectedFile.size,
+          hasImages:
+            "hasImages" in response ? Boolean(response.hasImages) : false,
+        },
+      });
 
       if (response.success && response.text) {
         setExtractedText(response.text);

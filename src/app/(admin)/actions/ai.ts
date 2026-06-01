@@ -2,10 +2,12 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { formatOfferingSpellingRulesForPrompt } from "@/lib/offering-spelling-rules";
+import { recordAppLog } from "@/app/(admin)/actions/logs";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function fixGrammar(htmlContent: string) {
+  const startedAt = Date.now();
   try {
     const spellingRules = formatOfferingSpellingRulesForPrompt();
 
@@ -49,12 +51,36 @@ ${htmlContent}
       correctedHtml?: string;
     };
 
+    const durationMs = Date.now() - startedAt;
+    const correctedHtml = resultObj.correctedHtml ?? "";
+    await recordAppLog({
+      logType: "doc_ai_analysis",
+      durationMs,
+      success: true,
+      metadata: {
+        htmlLength: htmlContent.length,
+        hasCorrections: correctedHtml.includes("ai-correction"),
+        language: resultObj.language,
+      },
+    });
+
     return {
       success: true,
-      text: resultObj.correctedHtml,
+      text: correctedHtml,
       language: resultObj.language,
     };
   } catch (error) {
+    const durationMs = Date.now() - startedAt;
+    await recordAppLog({
+      logType: "doc_ai_analysis",
+      durationMs,
+      success: false,
+      errorMessage:
+        error instanceof Error ? error.message : "Failed to process text with AI.",
+      metadata: {
+        htmlLength: htmlContent.length,
+      },
+    });
     console.error("Failed to fix grammar:", error);
     return { success: false, error: "Failed to process text with AI." };
   }

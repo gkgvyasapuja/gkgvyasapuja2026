@@ -1,12 +1,16 @@
 import {
   boolean,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+
+/** Known app log types; the column accepts any string for future types. */
+export type AppLogType = "doc_parse" | "doc_ai_analysis";
 
 export const countries = pgTable("country", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -186,6 +190,20 @@ export const templeRequests = pgTable("temple_request", {
 
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+/** Performance and timing logs for upload flows and other app events. */
+export const appLogs = pgTable("app_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  logType: varchar("log_type", { length: 64 })
+    .notNull()
+    .$type<AppLogType>(),
+  /** Elapsed time in milliseconds. */
+  durationMs: integer("duration_ms").notNull(),
+  success: boolean("success").default(true).notNull(),
+  errorMessage: text("error_message"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 /** Append-only log of staff edits to offerings. */
