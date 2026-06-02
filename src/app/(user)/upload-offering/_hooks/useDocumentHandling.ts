@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { parseDocx } from "@/app/(admin)/actions/offering";
 import { recordAppLog } from "@/app/(admin)/actions/logs";
+import { buildAppLogMetadata } from "@/lib/app-log-context";
 import {
   isOfferingDocTooLarge,
   PARSE_DOCX_TIMEOUT_MS,
 } from "@/lib/offering-document-limits";
+import type { OfferingFormData } from "../_components/types";
 
 const RETRY_HINT =
   " Please select your .docx file and try uploading again.";
@@ -22,7 +24,10 @@ function resetFileInput(input: HTMLInputElement) {
   input.value = "";
 }
 
-export function useDocumentHandling(setError: (error: string | null) => void) {
+export function useDocumentHandling(
+  setError: (error: string | null) => void,
+  formData: OfferingFormData,
+) {
   const [file, setFile] = useState<File | null>(null);
   const [extractedText, setExtractedText] = useState("");
   const [isParsing, setIsParsing] = useState(false);
@@ -116,11 +121,11 @@ export function useDocumentHandling(setError: (error: string | null) => void) {
         durationMs: performance.now() - startedAt,
         success: logSuccess,
         errorMessage: logError,
-        metadata: {
+        metadata: buildAppLogMetadata(formData, {
           fileName: selectedFile.name,
           fileSizeBytes: selectedFile.size,
           hasImages: logHasImages,
-        },
+        }),
       });
     }
   };

@@ -3,10 +3,14 @@
 import { GoogleGenAI } from "@google/genai";
 import { formatOfferingSpellingRulesForPrompt } from "@/lib/offering-spelling-rules";
 import { recordAppLog } from "@/app/(admin)/actions/logs";
+import type { AppLogMetadata } from "@/lib/app-log-context";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export async function fixGrammar(htmlContent: string) {
+export async function fixGrammar(
+  htmlContent: string,
+  logContext?: AppLogMetadata,
+) {
   const startedAt = Date.now();
   try {
     const spellingRules = formatOfferingSpellingRulesForPrompt();
@@ -58,6 +62,7 @@ ${htmlContent}
       durationMs,
       success: true,
       metadata: {
+        ...logContext,
         htmlLength: htmlContent.length,
         hasCorrections: correctedHtml.includes("ai-correction"),
         language: resultObj.language,
@@ -78,6 +83,7 @@ ${htmlContent}
       errorMessage:
         error instanceof Error ? error.message : "Failed to process text with AI.",
       metadata: {
+        ...logContext,
         htmlLength: htmlContent.length,
       },
     });

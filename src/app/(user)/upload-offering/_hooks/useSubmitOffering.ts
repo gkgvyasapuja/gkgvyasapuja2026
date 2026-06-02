@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { submitOffering } from "@/app/(admin)/actions/offering";
 import { fixGrammar } from "@/app/(admin)/actions/ai";
+import { buildAppLogMetadata } from "@/lib/app-log-context";
 import { OfferingFormData } from "../_components/types";
 import { toast } from "sonner";
 
@@ -153,7 +154,14 @@ export function useSubmitOffering(
     setError(null);
     setAiGrammarFailed(false);
     try {
-      const result = await fixGrammar(sourceHtml);
+      const result = await fixGrammar(
+        sourceHtml,
+        buildAppLogMetadata(formData, {
+          fileName: file.name,
+          fileSizeBytes: file.size,
+          htmlLength: sourceHtml.length,
+        }),
+      );
       if (result.success && result.text) {
         setExtractedText(result.text);
         if (result.language) {

@@ -218,7 +218,7 @@ export default function UploadOfferingForm() {
     isParsing,
     hasImages,
     handleFileChange,
-  } = useDocumentHandling(setError);
+  } = useDocumentHandling(setError, formData);
 
   const [suggestionRequiresAction, setSuggestionRequiresAction] =
     useState(false);
