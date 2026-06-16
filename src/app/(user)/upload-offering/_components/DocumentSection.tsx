@@ -168,7 +168,7 @@ export function DocumentSection({
             id="offering-doc-upload"
             type="file"
             className="hidden"
-            accept=".docx"
+            accept=".doc,.docx"
             disabled={isParsing}
             onChange={handleFileChange}
           />
