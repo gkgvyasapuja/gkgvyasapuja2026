@@ -53,14 +53,15 @@ function sanitizeOfferingFileSegment(value: string): string {
     .replace(/^_|_$/g, "");
 }
 
-/** Offering object name: firstName_lastName_mobile_state_city_temple.docx */
-export function buildOfferingDocxFileName(params: {
+/** Offering object name: firstName_lastName_mobile_state_city_temple.{doc|docx} */
+export function buildOfferingDocFileName(params: {
   firstName: string;
   lastName: string;
   mobile: string;
   state: string;
   city: string;
   temple: string;
+  extension: "doc" | "docx";
 }): string {
   const parts = [
     params.firstName,
@@ -74,13 +75,21 @@ export function buildOfferingDocxFileName(params: {
     .filter(Boolean);
 
   const base = parts.join("_") || "offering";
-  return `${base.slice(0, 200)}.docx`;
+  return `${base.slice(0, 200)}.${params.extension}`;
 }
 
-export async function uploadOfferingDocx(params: {
+/** @deprecated Use `buildOfferingDocFileName` */
+export function buildOfferingDocxFileName(
+  params: Omit<Parameters<typeof buildOfferingDocFileName>[0], "extension">,
+): string {
+  return buildOfferingDocFileName({ ...params, extension: "docx" });
+}
+
+export async function uploadOfferingDoc(params: {
   year: string;
   buffer: Buffer;
   fileName: string;
+  contentType: string;
 }): Promise<{ key: string; url: string }> {
   const { client, bucket } = requireConfig();
   const safeName = params.fileName
@@ -93,13 +102,25 @@ export async function uploadOfferingDocx(params: {
       Bucket: bucket,
       Key: key,
       Body: params.buffer,
-      ContentType:
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ContentType: params.contentType,
       CacheControl: "private, max-age=31536000",
     }),
   );
 
   return { key, url: publicObjectUrl(key) };
+}
+
+/** @deprecated Use `uploadOfferingDoc` */
+export async function uploadOfferingDocx(params: {
+  year: string;
+  buffer: Buffer;
+  fileName: string;
+}): Promise<{ key: string; url: string }> {
+  return uploadOfferingDoc({
+    ...params,
+    contentType:
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  });
 }
 
 const ADMIN_MEDIA_PREFIX = "admin-media";

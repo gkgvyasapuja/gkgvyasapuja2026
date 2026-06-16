@@ -3,13 +3,14 @@ import { parseDocx } from "@/app/(admin)/actions/offering";
 import { recordAppLog } from "@/app/(admin)/actions/logs";
 import { buildAppLogMetadata } from "@/lib/app-log-context";
 import {
+  isOfferingDocFileName,
+  OFFERING_DOC_RETRY_HINT,
+} from "@/lib/offering-document";
+import {
   isOfferingDocTooLarge,
   PARSE_DOCX_TIMEOUT_MS,
 } from "@/lib/offering-document-limits";
 import type { OfferingFormData } from "../_components/types";
-
-const RETRY_HINT =
-  " Please select your .docx file and try uploading again.";
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([
@@ -38,21 +39,21 @@ export function useDocumentHandling(
     const selectedFile = input.files?.[0];
     if (!selectedFile) return;
 
-    if (!selectedFile.name.toLowerCase().endsWith(".docx")) {
-      setError("Please upload a .docx file." + RETRY_HINT);
+    if (!isOfferingDocFileName(selectedFile.name)) {
+      setError("Please upload a .doc or .docx file." + OFFERING_DOC_RETRY_HINT);
       resetFileInput(input);
       return;
     }
 
     if (selectedFile.size === 0) {
-      setError("The selected file is empty." + RETRY_HINT);
+      setError("The selected file is empty." + OFFERING_DOC_RETRY_HINT);
       resetFileInput(input);
       return;
     }
 
     if (isOfferingDocTooLarge(selectedFile.size)) {
       setError(
-        "File is too large. Maximum size is 2MB." + RETRY_HINT,
+        "File is too large. Maximum size is 2MB." + OFFERING_DOC_RETRY_HINT,
       );
       resetFileInput(input);
       return;
@@ -91,7 +92,7 @@ export function useDocumentHandling(
         }
       } else {
         logError = response.error || "Failed to parse document.";
-        setError(logError + RETRY_HINT);
+        setError(logError + OFFERING_DOC_RETRY_HINT);
         setFile(null);
         setHasImages(false);
         resetFileInput(input);
@@ -101,13 +102,14 @@ export function useDocumentHandling(
         logError = "parse_timeout";
         setError(
           "Extracting text took too long. This can happen on a slow connection or with a heavy document. Try again on Wi‑Fi, or use a smaller file." +
-            RETRY_HINT,
+            OFFERING_DOC_RETRY_HINT,
         );
       } else {
         logError =
           err instanceof Error ? err.message : "parse_request_failed";
         setError(
-          "Something went wrong while reading your document." + RETRY_HINT,
+          "Something went wrong while reading your document." +
+            OFFERING_DOC_RETRY_HINT,
         );
       }
       setFile(null);

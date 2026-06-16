@@ -13,17 +13,18 @@ import {
 } from "@/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 import {
-  buildOfferingDocxFileName,
+  buildOfferingDocFileName,
   deleteObjectByKey,
   deleteObjectByUrl,
-  uploadOfferingDocx,
+  uploadOfferingDoc,
 } from "@/lib/s3";
+import { parseOfferingDocument } from "@/lib/offering-document-parse";
 import {
-  applyParagraphAlignments,
-  extractDocxParagraphAlignments,
-} from "@/lib/docx-html-alignment";
+  isOfferingDocFileName,
+  getOfferingDocExtension,
+  offeringDocContentType,
+} from "@/lib/offering-document";
 import { isOfferingDocTooLarge } from "@/lib/offering-document-limits";
-const mammoth = require("mammoth");
 
 function formDataString(fd: FormData, key: string): string {
   const v = fd.get(key);
@@ -191,10 +192,14 @@ export async function submitOffering(fd: FormData) {
 
   const file = fd.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { success: false, error: "Please upload a .docx offering document." };
+    return {
+      success: false,
+      error: "Please upload a .doc or .docx offering document.",
+    };
   }
-  if (!file.name.toLowerCase().endsWith(".docx")) {
-    return { success: false, error: "Only .docx files are accepted." };
+  const fileExt = getOfferingDocExtension(file.name);
+  if (!fileExt) {
+    return { success: false, error: "Only .doc and .docx files are accepted." };
   }
   if (isOfferingDocTooLarge(file.size)) {
     return {
@@ -231,22 +236,24 @@ export async function submitOffering(fd: FormData) {
           .then((rows) => rows[0]),
   ]);
 
-  const offeringFileName = buildOfferingDocxFileName({
+  const offeringFileName = buildOfferingDocFileName({
     firstName: userValues.firstName,
     lastName: userValues.lastName,
     mobile: userValues.phone,
     state: stateRow?.name ?? "",
     city: cityRow?.name ?? "",
     temple: isOtherTemple ? rawOtherTempleName : (templeRow?.name ?? ""),
+    extension: fileExt,
   });
 
   let uploadKey: string;
   let documentUrl: string;
   try {
-    const uploaded = await uploadOfferingDocx({
+    const uploaded = await uploadOfferingDoc({
       year,
       buffer,
       fileName: offeringFileName,
+      contentType: offeringDocContentType(fileExt),
     });
     uploadKey = uploaded.key;
     documentUrl = uploaded.url;
@@ -386,6 +393,12 @@ export async function parseDocx(formData: FormData) {
     if (!file) {
       return { success: false, error: "No file provided" };
     }
+    if (!isOfferingDocFileName(file.name)) {
+      return {
+        success: false,
+        error: "Only .doc and .docx files are accepted.",
+      };
+    }
     if (file.size === 0) {
       return { success: false, error: "The uploaded file is empty" };
     }
@@ -396,29 +409,8 @@ export async function parseDocx(formData: FormData) {
       };
     }
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    let hasImages = false;
-    const result = await mammoth.convertToHtml(
-      { buffer },
-      {
-        ignoreEmptyParagraphs: false,
-        convertImage: mammoth.images.imgElement(function (image: {
-          contentType: string;
-          readAsBase64String: () => Promise<string>;
-        }) {
-          hasImages = true;
-          return image.readAsBase64String().then(function (imageBuffer: string) {
-            return {
-              src: "data:" + image.contentType + ";base64," + imageBuffer,
-            };
-          });
-        }),
-      },
-    );
-
-    const alignments = await extractDocxParagraphAlignments(buffer);
-    const html = applyParagraphAlignments(result.value, alignments);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const { html, hasImages } = await parseOfferingDocument(buffer, file.name);
 
     console.info("[parseDocx] ok", {
       size: file.size,
@@ -436,7 +428,7 @@ export async function parseDocx(formData: FormData) {
     return {
       success: false,
       error:
-        "Failed to read the document. Please make sure it is a valid .docx file.",
+        "Failed to read the document. Please make sure it is a valid .doc or .docx file.",
     };
   }
 }

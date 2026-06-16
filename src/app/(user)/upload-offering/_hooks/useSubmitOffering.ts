@@ -68,7 +68,7 @@ export function useSubmitOffering(
 
   const validateStep2 = () => {
     if (!file || !extractedText) {
-      setError("Please upload a valid .docx offering document.");
+      setError("Please upload a valid .doc or .docx offering document.");
       return false;
     }
     setError(null);
@@ -136,7 +136,7 @@ export function useSubmitOffering(
     onComplete?: () => void,
   ) => {
     if (!file || !sourceHtml.trim()) {
-      setError("Please upload a valid .docx offering document.");
+      setError("Please upload a valid .doc or .docx offering document.");
       return;
     }
 
