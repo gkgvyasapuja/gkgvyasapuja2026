@@ -158,7 +158,7 @@ export function DocumentSection({
                 className="size-4 shrink-0"
                 aria-hidden
               />
-              Select .docx File
+              Select .doc or .docx File
             </span>
             <p className="mt-8 text-[10px] font-semibold tracking-[0.2em] text-slate-400 uppercase">
               Max file size: 2MB
