@@ -23,7 +23,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileDown, ImageIcon } from "lucide-react";
+import { OfferingDocumentLinks } from "@/components/offerings/OfferingDocumentLinks";
+import { ImageIcon } from "lucide-react";
 
 type OfferingRow = Awaited<
   ReturnType<typeof getAdminOfferings>
@@ -112,7 +113,7 @@ export function OfferingsListPage({
                 </TableHead>
                 <TableHead className={cn(thClass, "min-w-[200px]")}>Note</TableHead>
                 <TableHead className={cn(thClass, "whitespace-nowrap")}>
-                  Document
+                  Downloads
                 </TableHead>
                 <TableHead className={thClass}>Date</TableHead>
               </TableRow>
@@ -215,20 +216,10 @@ export function OfferingsListPage({
                     />
                   </TableCell>
                   <TableCell className={cn(tdClass, "whitespace-nowrap")}>
-                    {item.documentUrl ? (
-                      <a
-                        href={item.documentUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-1.5 text-indigo-600 hover:text-indigo-800 hover:underline text-sm"
-                        title="Download original .docx"
-                      >
-                        <FileDown className="h-3.5 w-3.5" aria-hidden />
-                        Download
-                      </a>
-                    ) : (
-                      <span className="text-sm text-gray-400">—</span>
-                    )}
+                    <OfferingDocumentLinks
+                      offeringId={item.id}
+                      documentUrl={item.documentUrl}
+                    />
                   </TableCell>
                   <TableCell className={cn(tdClass, "text-sm whitespace-nowrap")}>
                     {item.createdAt

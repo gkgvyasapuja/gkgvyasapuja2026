@@ -6,7 +6,7 @@ import {
   formatStaffEditedAt,
   offeringHasImages,
 } from "@/lib/offering-staff-edit";
-import { getObjectBuffer, objectKeyFromPublicUrl } from "@/lib/s3";
+import { getObjectBuffer, objectKeyFromPublicUrl, buildOfferingDocFileName } from "@/lib/s3";
 import {
   Document,
   HeadingLevel,
@@ -39,6 +39,39 @@ function offeringFileName(documentUrl: string | null): string {
   } catch {
     return "";
   }
+}
+
+export function offeringEditedDocxFileName(params: {
+  offeringId: string;
+  documentUrl: string | null;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  stateName: string | null;
+  cityName: string | null;
+  templeName: string | null;
+  otherTempleName: string | null;
+}): string {
+  const original = offeringFileName(params.documentUrl);
+  if (original) {
+    const dot = original.lastIndexOf(".");
+    const stem = dot > 0 ? original.slice(0, dot) : original;
+    return `${stem}_edited.docx`;
+  }
+
+  const temple =
+    params.templeName ??
+    (params.otherTempleName ? `Other_${params.otherTempleName}` : "temple");
+
+  return buildOfferingDocFileName({
+    firstName: params.firstName,
+    lastName: params.lastName,
+    mobile: params.phone,
+    state: params.stateName ?? "",
+    city: params.cityName ?? "",
+    temple,
+    extension: "docx",
+  }).replace(/\.docx$/, "_edited.docx");
 }
 
 function uniqueZipEntryName(baseName: string, used: Set<string>): string {
@@ -134,6 +167,20 @@ export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
   return XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
 }
 
+function offeringHtmlToParagraphs(html: string): Paragraph[] {
+  const body = stripHtmlForExport(html);
+  return body.split(/\r?\n/).map(
+    (line) => new Paragraph({ text: line.length > 0 ? line : " " }),
+  );
+}
+
+export async function buildOfferingEditedDocxBuffer(html: string) {
+  const doc = new Document({
+    sections: [{ children: offeringHtmlToParagraphs(html) }],
+  });
+  return Packer.toBuffer(doc);
+}
+
 export async function buildOfferingsDocxBuffer(rows: AdminOfferingExportRow[]) {
   const children: Paragraph[] = [
     new Paragraph({
@@ -145,11 +192,7 @@ export async function buildOfferingsDocxBuffer(rows: AdminOfferingExportRow[]) {
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
-
-    const body = stripHtmlForExport(r.offering);
-    for (const line of body.split(/\r?\n/)) {
-      children.push(new Paragraph({ text: line.length > 0 ? line : " " }));
-    }
+    children.push(...offeringHtmlToParagraphs(r.offering));
     children.push(new Paragraph({ text: "" }));
   }
 

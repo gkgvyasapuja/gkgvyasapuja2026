@@ -792,6 +792,34 @@ export type AdminOfferingExportRow = Awaited<
   ReturnType<typeof getAdminOfferingsForExport>
 >[number];
 
+/** Auth must be checked by the caller (e.g. API route via `canManageOfferings`). */
+export async function getOfferingForEditedDocxDownload(id: string) {
+  const rows = await db
+    .select({
+      id: offerings.id,
+      offering: offerings.offering,
+      documentUrl: offerings.documentUrl,
+      user: {
+        firstName: users.firstName,
+        lastName: users.lastName,
+        phone: users.phone,
+        otherTempleName: users.otherTempleName,
+      },
+      stateName: states.name,
+      cityName: cities.name,
+      templeName: temples.name,
+    })
+    .from(offerings)
+    .innerJoin(users, eq(offerings.userId, users.id))
+    .leftJoin(states, eq(users.stateId, states.id))
+    .leftJoin(cities, eq(users.cityId, cities.id))
+    .leftJoin(temples, eq(users.templeId, temples.id))
+    .where(eq(offerings.id, id))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
 export async function editOffering(
   id: string,
   data: { offering: string; language: "Hindi" | "English" },

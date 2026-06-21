@@ -21,7 +21,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Edit2, FileDown, ImageIcon, Layers } from "lucide-react";
+import { OfferingDocumentLinks } from "@/components/offerings/OfferingDocumentLinks";
+import { Edit2, ImageIcon, Layers } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const QuillEditor = dynamic(
@@ -152,18 +153,11 @@ function OfferingBlock({ item }: { item: OfferingPageItem }) {
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {item.documentUrl && (
-            <a
-              href={item.documentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-muted hover:text-indigo-700 transition-colors"
-              title="Open the original uploaded document"
-            >
-              <FileDown className="h-3.5 w-3.5" aria-hidden />
-              Download .docx
-            </a>
-          )}
+          <OfferingDocumentLinks
+            offeringId={item.id}
+            documentUrl={item.documentUrl}
+            variant="compact"
+          />
           {!isEditing && (
             <Button
               type="button"

@@ -15,7 +15,8 @@ import {
 // import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { editOffering } from "@/app/(admin)/actions/admin";
-import { Eye, Edit2, FileDown } from "lucide-react";
+import { OfferingDocumentLinks } from "@/components/offerings/OfferingDocumentLinks";
+import { Eye, Edit2 } from "lucide-react";
 import dynamic from "next/dynamic";
 
 const QuillEditor = dynamic(
@@ -102,18 +103,11 @@ export function ViewEditOfferingModal({
         <DialogHeader className="flex flex-row justify-between items-center mr-6 gap-2">
           <DialogTitle>Offering by {offering.userParams}</DialogTitle>
           <div className="flex items-center gap-2">
-            {offering.documentUrl && (
-              <a
-                href={offering.documentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-input bg-background px-2.5 py-1.5 text-xs font-medium text-indigo-600 hover:bg-muted hover:text-indigo-700 transition-colors"
-                title="Open the original uploaded document"
-              >
-                <FileDown className="w-3.5 h-3.5" />
-                Download .docx
-              </a>
-            )}
+            <OfferingDocumentLinks
+              offeringId={offering.id}
+              documentUrl={offering.documentUrl}
+              variant="compact"
+            />
             {!isEditing && (
               <Button
                 variant="outline"
