@@ -7,10 +7,9 @@ import {
   offeringHasImages,
 } from "@/lib/offering-staff-edit";
 import { getObjectBuffer, objectKeyFromPublicUrl, buildOfferingDocFileName } from "@/lib/s3";
+import { buildOfferingHtmlDocxBuffer, offeringHtmlToParagraphs, buildParagraphsDocxBuffer } from "@/lib/offering-html-to-docx";
 import {
-  Document,
   HeadingLevel,
-  Packer,
   Paragraph,
 } from "docx";
 import JSZip from "jszip";
@@ -167,18 +166,8 @@ export function buildOfferingsXlsxBuffer(rows: AdminOfferingExportRow[]) {
   return XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer;
 }
 
-function offeringHtmlToParagraphs(html: string): Paragraph[] {
-  const body = stripHtmlForExport(html);
-  return body.split(/\r?\n/).map(
-    (line) => new Paragraph({ text: line.length > 0 ? line : " " }),
-  );
-}
-
 export async function buildOfferingEditedDocxBuffer(html: string) {
-  const doc = new Document({
-    sections: [{ children: offeringHtmlToParagraphs(html) }],
-  });
-  return Packer.toBuffer(doc);
+  return buildOfferingHtmlDocxBuffer(html);
 }
 
 export async function buildOfferingsDocxBuffer(rows: AdminOfferingExportRow[]) {
@@ -196,13 +185,5 @@ export async function buildOfferingsDocxBuffer(rows: AdminOfferingExportRow[]) {
     children.push(new Paragraph({ text: "" }));
   }
 
-  const doc = new Document({
-    sections: [
-      {
-        children,
-      },
-    ],
-  });
-
-  return Packer.toBuffer(doc);
+  return buildParagraphsDocxBuffer(children);
 }
