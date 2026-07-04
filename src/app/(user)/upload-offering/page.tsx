@@ -1,7 +1,11 @@
 "use client";
 
 import { MouseEvent } from "react";
+import { CalendarX, Mail, MessageCircle } from "lucide-react";
 import UploadOfferingForm from "./_components/UploadOfferingForm";
+
+/** Set to true when offering submissions should be accepted again. */
+const OFFERING_SUBMISSIONS_OPEN = false;
 
 export default function UploadOfferingPage() {
   const scrollToTips = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -18,42 +22,113 @@ export default function UploadOfferingPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-125 bg-blue-500/20 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
-          <div className="text-center mb-12 sm:mb-16">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-black mb-6 tracking-tight">
-              Offer Your Homage
-            </h1>
-            <p className="text-base md:text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
-              Please share your Vyas Puja offering for His Holiness Gopal
-              Krishna Goswami Maharaja. We accept offerings in English and
-              Hindi.
-            </p>
-          </div>
+          {OFFERING_SUBMISSIONS_OPEN ? (
+            <>
+              <div className="text-center mb-12 sm:mb-16">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-black mb-6 tracking-tight">
+                  Offer Your Homage
+                </h1>
+                <p className="text-base md:text-lg text-gray-600 max-w-xl mx-auto leading-relaxed">
+                  Please share your Vyas Puja offering for His Holiness Gopal
+                  Krishna Goswami Maharaja. We accept offerings in English and
+                  Hindi.
+                </p>
+              </div>
 
-          <p className="text-center bg-white p-5 shadow-md mb-10 rounded-lg text-gray-700">
-            For better insights on how to write the perfect offering please go
-            through{" "}
-            <a
-              className="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-200 px-3 py-1.5 text-blue-700 font-semibold hover:bg-blue-100 transition"
-              href="#how-to"
-              onClick={scrollToTips}
-            >
-              writing tips for offering
-            </a>{" "}
-            section. You can even{" "}
-            <a
-              href="https://gkg-vyasa-puja.s3.us-east-1.amazonaws.com/assets/Sample+Offering+English.docx"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="text-blue-500 underline"
-            >
-              download sample offering
-            </a>{" "}
-            file for reference.
-          </p>
+              <p className="text-center bg-white p-5 shadow-md mb-10 rounded-lg text-gray-700">
+                For better insights on how to write the perfect offering please
+                go through{" "}
+                <a
+                  className="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-200 px-3 py-1.5 text-blue-700 font-semibold hover:bg-blue-100 transition"
+                  href="#how-to"
+                  onClick={scrollToTips}
+                >
+                  writing tips for offering
+                </a>{" "}
+                section. You can even{" "}
+                <a
+                  href="https://gkg-vyasa-puja.s3.us-east-1.amazonaws.com/assets/Sample+Offering+English.docx"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-blue-500 underline"
+                >
+                  download sample offering
+                </a>{" "}
+                file for reference.
+              </p>
 
-          <div className="w-full max-w-5xl mx-auto bg-white border border-slate-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-2xl p-5 md:p-8">
-            <UploadOfferingForm />
-          </div>
+              <div className="w-full max-w-5xl mx-auto bg-white border border-slate-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-2xl p-5 md:p-8">
+                <UploadOfferingForm />
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="text-center mb-10 sm:mb-12">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium text-black mb-6 tracking-tight">
+                  Offer Your Homage
+                </h1>
+              </div>
+
+              <div className="w-full max-w-3xl mx-auto bg-white border border-slate-200 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-2xl overflow-hidden">
+                <div className="bg-gradient-to-r from-amber-50 via-white to-blue-50 border-b border-slate-100 px-6 py-8 md:px-10 md:py-10 text-center">
+                  <p className="text-2xl md:text-3xl font-semibold text-slate-900 mb-1">
+                    Hare Krishna
+                  </p>
+                  <p className="text-base md:text-lg text-slate-600">
+                    Dear devotees,
+                  </p>
+                  <p className="mt-4 text-base md:text-lg text-slate-700 leading-relaxed">
+                    Please Accept Our Humble Obeisances.
+                  </p>
+                </div>
+
+                <div className="px-6 py-8 md:px-10 md:py-10 space-y-6 text-slate-700 text-base md:text-lg leading-relaxed">
+                  <div className="flex items-start gap-4 p-4 sm:p-5 bg-amber-50 border border-amber-200 rounded-xl">
+                    <div className="shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
+                      <CalendarX className="w-5 h-5" aria-hidden />
+                    </div>
+                    <p>
+                      As the last date for submitting offerings was{" "}
+                      <span className="font-semibold text-slate-900">
+                        30th June 2026
+                      </span>
+                      , the website will not accept any offerings now.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start gap-4 p-4 sm:p-5 bg-sky-50 border border-sky-200 rounded-xl">
+                    <div className="shrink-0 flex flex-col gap-2">
+                      <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-sky-700">
+                        <MessageCircle className="w-5 h-5" aria-hidden />
+                      </div>
+                    </div>
+                    <p>
+                      Also please do not send offerings through{" "}
+                      <span className="font-semibold text-slate-900">
+                        WhatsApp
+                      </span>{" "}
+                      or{" "}
+                      <span className="inline-flex items-center gap-1 font-semibold text-slate-900">
+                        <Mail className="w-4 h-4 inline shrink-0" aria-hidden />
+                        Email
+                      </span>{" "}
+                      as they will not be included in the book.
+                    </p>
+                  </div>
+
+                  <p>
+                    The cutoff was necessary considering the time needed for
+                    editing, proofreading and book designing.
+                  </p>
+
+                  <p className="pt-2 border-t border-slate-100 text-slate-600 italic text-center">
+                    Next year, we hope to receive your offerings at the
+                    earliest.
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
 
           {/* <div className="text-center">
             <h2 className="text-2xl md:text-3xl font-semibold text-black mb-4 tracking-tight mt-20">

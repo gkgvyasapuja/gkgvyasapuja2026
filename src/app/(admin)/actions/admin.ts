@@ -17,6 +17,7 @@ import {
   offeringEditLogs,
 } from "@/db/schema";
 import { eq, desc, and, asc, count, ilike, or, gte, lte } from "drizzle-orm";
+import { sortOfferingsByDisplayName } from "@/lib/offering-display-name";
 import { alias } from "drizzle-orm/pg-core";
 import { revalidatePath } from "next/cache";
 
@@ -106,6 +107,10 @@ export async function searchStates(
     : undefined;
   if (safe.length === 0) {
     const q = countryFilter ? base.where(countryFilter) : base;
+    // When scoped to a country, return every state (e.g. India has 36).
+    if (countryFilter) {
+      return q.orderBy(asc(states.name));
+    }
     return q.orderBy(asc(states.name)).limit(SEARCH_LIMIT);
   }
   const pattern = `%${safe}%`;
@@ -174,6 +179,10 @@ export async function searchCities(
   if (safe.length === 0) {
     const whereClause = conds.length > 0 ? and(...conds) : undefined;
     const q = whereClause ? joinBase.where(whereClause) : joinBase;
+    // When scoped to a state or country, return every matching city.
+    if (whereClause) {
+      return q.orderBy(asc(cities.name));
+    }
     return q.orderBy(asc(cities.name)).limit(SEARCH_LIMIT);
   }
   const pattern = `%${safe}%`;
@@ -731,7 +740,7 @@ export async function getAdminOfferingsForExport(filters?: {
   /** Auth must be checked by the caller (e.g. API route via `canManageOfferings`). */
   const whereClause = buildOfferingWhereConditions(filters);
 
-  return db
+  const rows = await db
     .select({
       id: offerings.id,
       year: offerings.year,
@@ -784,8 +793,9 @@ export async function getAdminOfferingsForExport(filters?: {
       eq(offerings.markedEditedByMaintainerId, markedEditorMaintainer.id),
     )
     .where(whereClause)
-    .orderBy(desc(offerings.createdAt))
     .limit(MAX_EXPORT_ROWS);
+
+  return sortOfferingsByDisplayName(rows);
 }
 
 export type AdminOfferingExportRow = Awaited<

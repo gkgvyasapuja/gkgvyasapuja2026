@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { getAdminOfferings } from "@/app/(admin)/actions/admin";
 import { editOffering } from "@/app/(admin)/actions/admin";
@@ -12,6 +12,7 @@ import {
   offeringHasImages,
 } from "@/lib/offering-staff-edit";
 import { OfferingMarkEditedControls } from "@/components/offerings/OfferingMarkEditedControls";
+import { sortOfferingsByDisplayName } from "@/lib/offering-display-name";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -249,6 +250,10 @@ interface OfferingsPageViewModalProps {
 
 export function OfferingsPageViewModal({ offerings }: OfferingsPageViewModalProps) {
   const [open, setOpen] = useState(false);
+  const sortedOfferings = useMemo(
+    () => sortOfferingsByDisplayName(offerings),
+    [offerings],
+  );
 
   return (
     <>
@@ -270,7 +275,7 @@ export function OfferingsPageViewModal({ offerings }: OfferingsPageViewModalProp
         >
           <DialogHeader className="px-4 pt-4 pb-2 border-b shrink-0">
             <DialogTitle className="text-lg">
-              Offerings on this page ({offerings.length})
+              Offerings on this page ({sortedOfferings.length})
             </DialogTitle>
             <p className="text-sm text-muted-foreground font-normal">
               Scroll to read each offering. Use Edit on any card to change it
@@ -278,7 +283,7 @@ export function OfferingsPageViewModal({ offerings }: OfferingsPageViewModalProp
             </p>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-            {offerings.map((item) => (
+            {sortedOfferings.map((item) => (
               <OfferingBlock key={item.id} item={item} />
             ))}
           </div>
