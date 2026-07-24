@@ -75,8 +75,9 @@ export async function searchCountries(query: string) {
   const base = db
     .select({ id: countries.id, name: countries.name })
     .from(countries);
+  // Empty query: return every country so the dropdown isn't capped at 25.
   if (safe.length === 0) {
-    return base.orderBy(asc(countries.name)).limit(SEARCH_LIMIT);
+    return base.orderBy(asc(countries.name));
   }
   const pattern = `%${safe}%`;
   return base
