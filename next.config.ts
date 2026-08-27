@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   // Produces .next/standalone for small servers: run `node server.js` (no `next build` on the host).
   output: "standalone",
   images: {
-    domains: ["gkgvyasapuja.com", "iskcongkg.s3.ap-south-1.amazonaws.com"],
     remotePatterns: [
       {
         protocol: "https",
@@ -17,6 +16,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "iskcongkg.s3.ap-south-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "gkg-vyasa-puja.s3.us-east-1.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.amazonaws.com",
       },
     ],
   },
