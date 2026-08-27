@@ -537,45 +537,17 @@ export async function deleteTemple(id: string) {
 
 // --- Book Actions ---
 
-export async function getBooks() {
-  return db.select().from(books).orderBy(desc(books.createdAt));
-}
-
-export async function addBook(data: typeof books.$inferInsert) {
-  try {
-    await db.insert(books).values({
-      ...data,
-      downloadCount: data.downloadCount ?? 0,
-      viewCount: data.viewCount ?? 0,
-    });
-    revalidatePath("/admin-dashboard/books");
-    return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
-}
-
-export async function updateBook(
-  id: string,
-  data: Pick<
-    typeof books.$inferInsert,
-    "title" | "thumbnail" | "viewUrl" | "downloadUrl" | "publishedYear"
-  >,
-) {
-  try {
-    await db
-      .update(books)
-      .set({
-        ...data,
-        updatedAt: new Date(),
-      })
-      .where(eq(books.id, id));
-    revalidatePath("/admin-dashboard/books");
-    return { success: true as const };
-  } catch (error: any) {
-    return { success: false as const, error: error.message };
-  }
-}
+export {
+  getBooks,
+  getVisibleBooks,
+  addBook,
+  updateBook,
+  toggleBookVisibility,
+  deleteBook,
+  reorderBooks,
+  type AddBookInput,
+  type UpdateBookInput,
+} from "./books";
 
 // --- Offerings Actions ---
 

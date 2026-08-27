@@ -90,6 +90,9 @@ export const books = pgTable("book", {
   downloadCount: integer("download_count").default(0).notNull(),
   viewCount: integer("view_count").default(0).notNull(),
 
+  isVisible: boolean("is_visible").default(true).notNull(),
+  displayOrder: integer("display_order").default(0).notNull(),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

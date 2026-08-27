@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
-import { getBooks } from "@/app/(admin)/actions/admin";
+import { getVisibleBooks } from "@/app/(admin)/actions/books";
 
+export const dynamic = "force-dynamic";
+
+/**
+ * Public API Route to fetch visible ebooks grouped by published year.
+ *
+ * @returns {Promise<NextResponse>} JSON response containing grouped ebooks
+ */
 export async function GET() {
   try {
-    const ebooks = await getBooks();
+    const ebooks = await getVisibleBooks();
 
-    // Group by year in response shape expected by UI
+    // Group by published year in the shape expected by UI
     const grouped = Object.values(
       ebooks.reduce(
         (
